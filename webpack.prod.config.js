@@ -2,12 +2,13 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: [
-    './app/hook.js',
-  ],
+  entry: {
+    'hook': './app/main.js',
+    'hook-sw': './app/sw.js'
+  },
   output: {
-    path: path.resolve(__dirname, 'dist/proxy/hook'),
-    filename: 'hook.js'
+    path: path.resolve(__dirname, 'dist/proxy'),
+    filename: '[name].js'
   },
 
   mode: 'production',

@@ -2,12 +2,13 @@ const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
-  entry: [
-    './app/hook.js',
-  ],
+  entry: {
+    'hook': './app/main.js',
+    'hook-sw': './app/sw.js'
+  },
   output: {
-    path: path.resolve(__dirname, 'dist/proxy/hook'),
-    filename: 'hook.js'
+    path: path.resolve(__dirname, 'dist/proxy'),
+    filename: '[name].js'
   },
 
   mode: 'development',
@@ -36,11 +37,11 @@ module.exports = {
   devtool: 'eval-source-map',
   devServer: {
     port: 4200,
-    publicPath: '/proxy/hook/',
+    publicPath: '/proxy/',
     historyApiFallback: true,
     inline: true,
     proxy: {
-      context: (pathname) => !pathname.match("^/proxy/hook/"),
+      context: (pathname) => !pathname.match("^/proxy/(main.js|sw.js)$"),
       target: 'http://localhost:8080/'
     }
   }
