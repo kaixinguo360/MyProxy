@@ -1,16 +1,13 @@
 const path = require('path');
-const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: [
-    'react-hot-loader/patch',
-    './app/main.js'
+    './app/hook.js',
   ],
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: '[name].js'
+    path: path.resolve(__dirname, 'dist/proxy/hook'),
+    filename: 'hook.js'
   },
 
   mode: 'development',
@@ -33,18 +30,18 @@ module.exports = {
     ]
   },
   plugins: [
-    new webpack.BannerPlugin('Hello, Webpack'),
     new CleanWebpackPlugin(),
-    new HtmlWebpackPlugin({ template: __dirname + "/app/index.html" }),
-    new webpack.HotModuleReplacementPlugin(),
   ],
 
   devtool: 'eval-source-map',
   devServer: {
     port: 4200,
-    contentBase: './public',
+    publicPath: '/proxy/hook/',
     historyApiFallback: true,
     inline: true,
-    hot: true
+    proxy: {
+      context: (pathname) => !pathname.match("^/proxy/hook/"),
+      target: 'http://localhost:8080/'
+    }
   }
 };

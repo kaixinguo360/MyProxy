@@ -7,5 +7,3 @@ render(
   <Hello name={config.name} />,
   document.getElementById('root')
 );
-
-if (module.hot) { module.hot.accept() }
