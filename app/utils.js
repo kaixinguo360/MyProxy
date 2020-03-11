@@ -1,10 +1,44 @@
 
 // ----- Util Functions ----- //
 
-export function log(flag, message) {
-  console.debug(`[${flag}] ${message}`);
+export function log(flag, ...messages) {
+  console.debug('[' + flag + ']', ...messages);
 }
 
-export function proxy(url) {
-  return url;
+export function absUrl(url, base) {
+  const origin = base ? base.origin : ORIGIN;
+  const path = base ? base.href.substr(base.origin.length) : PATH;
+  if (!url) {
+    return url;
+  } else  if (url.startsWith('http://') || url.startsWith('https://')) {
+    return url;
+  } else if (url.startsWith('//')) {
+    return location.protocol + url;
+  } else if (url.startsWith('/')) {
+    return origin + url;
+  } else {
+    return origin + path + '/' + url;
+  }
+}
+export function encodeUrl(url) {
+  return btoa(url)
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_');
+}
+export function decodeUrl(url) {
+  return atob(url.replace(/-/g, '+').replace(/_/g, '/'));
+}
+
+export function proxy(url, base) {
+  const urlStr = absUrl(url, base);
+  
+  if (urlStr.startsWith(location.origin + '/proxy/')) {
+    return urlStr;
+  } else if (urlStr.startsWith(location.origin)) {
+    return `${location.origin}/proxy/static/${encodeUrl(
+      urlStr.replace(location.origin, base ? base.origin : ORIGIN)
+    )}`;
+  } else {
+    return `${location.origin}/proxy/static/${encodeUrl(urlStr)}`;
+  }
 }

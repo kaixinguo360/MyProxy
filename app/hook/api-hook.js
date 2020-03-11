@@ -1,5 +1,5 @@
 import ULocation from 'ulocation';
-import { log, proxy } from '../utils';
+import {log, proxy} from '../utils';
 
 // ----- Utils Functions ----- //
 function fakeProperty(object, key, fakeValue) {
@@ -16,24 +16,29 @@ function fakeProperty(object, key, fakeValue) {
 }
 function fakeFunction(object, key, fakeFunction) {
   const raw = object[key];
-  const fake = fakeFunction || ((raw, ...args) => raw(args));
   object[key] = (...args) => {
     log('Fake Function', `CALL ${object}.${key}(${args.join(', ')})`);
-    return fake(raw, ...args);
+    return fakeFunction ? fakeFunction(raw, ...args) : undefined;
   };
 }
 
 // ----- Init ----- //
 export default function init(href) {
   log('API_HOOK', `INIT ${href}`);
+  const urlObj = new URL(href);
 
   let __location = new ULocation(href);
   __location.reload = () => location.reload();
   __location.replace = (url) => location.replace(url);
   __location.__proto__ = Location.prototype;
   window.__location = __location;
+  document.__location = __location;
 
   // TODO
-  fakeFunction(window, 'open', (raw, url) => raw(proxy(url)));
+  fakeFunction(window, 'open', (raw, url, ...args) => raw(proxy(url), ...args));
+  fakeFunction(history, 'replaceState');
+  fakeFunction(history, 'pushState');
+  fakeProperty(document, 'domain', urlObj.hostname);
+  fakeProperty(document, 'URL', urlObj.href);
 
 }
