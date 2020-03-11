@@ -4,8 +4,6 @@ import {log, proxy} from '../utils';
 
 // ----- Init ----- //
 export default function init() {
-  log('DOM_HOOK', 'INIT');
-
   const observer = new MutationObserver(mutations =>
     mutations
       .filter(m => m.addedNodes.length)
@@ -25,4 +23,7 @@ export default function init() {
     subtree: true,
     attributeFilter: ['src', 'href', 'action']
   });
+
+  // Log
+  log('DOM_HOOK', 'INIT');
 }

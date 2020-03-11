@@ -1,7 +1,7 @@
 import $ from 'jquery';
-import styles from './ui/hook.css';
+import styles from '../ui/hook.css';
 import React from 'react';
-import { render } from 'react-dom';
+import {render} from 'react-dom';
 
 // ---------- URL ---------- //
 

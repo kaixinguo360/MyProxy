@@ -4,7 +4,6 @@ import {log} from '../utils';
 
 // ----- Init ----- //
 export default function init() {
-  log('SW_HOOK', 'INIT');
 
   // Install Service Worker
   if ('serviceWorker' in navigator) {
@@ -18,4 +17,7 @@ export default function init() {
       })
       .catch(error => log('SW_HOOK', 'FAILED ' + error));
   }
+
+  // Log
+  log('SW_HOOK', 'INIT');
 }

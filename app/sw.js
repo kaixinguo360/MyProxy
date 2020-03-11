@@ -3,40 +3,58 @@ import {absUrl, decodeUrl, proxy} from './utils';
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('fetch', e => e.respondWith(handleFetch(e)));
 
-function makeRes(body, status = 200, headers = {}) {
-  headers['access-control-allow-origin'] = '*';
-  return new Response(body, {status, headers});
-}
-
+// ----- Handlers ----- //
 function handleFetch(event) {
   const request = event.request;
   
-  if (request.url.startsWith(location.origin + '/proxy/hook.js') || request.url.startsWith(location.origin + '/sockjs-node/')) {
-    return fetch(request);
-  } else if (request.url.startsWith(location.origin + '/proxy/')) {
-    const encodeUrl = request.url.substr(request.url.lastIndexOf('/') + 1);
-    const url = decodeUrl(encodeUrl);
-    const base = new URL(url);
-    return fetch(request)
-      .then(res => processResponse(res, request, base))
-      .catch(() => makeRes('fetch failed', 504));
-  } else if (request.url.startsWith(location.origin)) {
-    return self.clients.get(event.clientId).then(client => {
-      if (!client.urlObj) {
-        const encodeUrl = client.url.substr(client.url.lastIndexOf('/') + 1);
-        const urlStr = decodeUrl(encodeUrl);
-        client.urlObj = new URL(urlStr);
-      }
-      const origin = client.urlObj.origin;
-      const path = request.url.substr(location.origin.length);
-      const urlStr = origin + path;
-      return fetchResponse(urlStr, request);
-    });
+  if (request.url.startsWith(location.origin)) {
+    const path = request.url.substr(location.origin.length);
+    if (path.startsWith('/proxy/hook.js') || path.startsWith('/proxy/add') || path.startsWith('/sockjs-node/')) {
+      return fetch(request);
+    } else if (path.startsWith('/proxy/')) {
+      return handleSamePathUrl(event, request);
+    } else {
+      return handleSameOriginUrl(event, request);
+    }
   } else {
     return fetchResponse(request.url, request);
   }
 }
+function handleSamePathUrl(event, request) {
+  let encodeUrl, url;
 
+  // get encodeUrl
+  if (request.url.startsWith(location.origin + '/proxy/static/')) {
+    encodeUrl = request.url.substr((location.origin + '/proxy/static/').length);
+  } else if (request.url.startsWith(location.origin + '/proxy/page/')) {
+    encodeUrl = request.url.substr((location.origin + '/proxy/page/').length);
+  }
+
+  // get url
+  try {
+    url = decodeUrl(encodeUrl);
+  } catch (e) {
+    return getClientBase(event.clientId).then(base => {
+      const urlStr = absUrl(encodeUrl, base);
+      return fetchResponse(urlStr, request);
+    });
+  }
+
+  const base = new URL(url);
+  return fetch(request)
+    .then(res => processResponse(res, request, base))
+    .catch(() => makeRes('fetch failed', 504));
+}
+function handleSameOriginUrl(event, request) {
+  return getClientBase(event.clientId).then(base => {
+    const origin = base.origin;
+    const path = request.url.substr(location.origin.length);
+    const urlStr = origin + path;
+    return fetchResponse(urlStr, request);
+  });
+}
+
+// ----- Response ----- //
 function fetchResponse(url, request) {
   const base = new URL(url);
   const proxyUrl = proxy(url, base);
@@ -45,7 +63,6 @@ function fetchResponse(url, request) {
     .then(res => processResponse(res, request, base))
     .catch(() => makeRes('fetch failed', 504));
 }
-
 function processResponse(response, request, base) {
   switch (request.destination) {
     
@@ -89,4 +106,20 @@ function processResponse(response, request, base) {
     default:
       return response;
   }
+}
+
+// ----- Utils ----- //
+function makeRes(body, status = 200, headers = {}) {
+  headers['access-control-allow-origin'] = '*';
+  return new Response(body, {status, headers});
+}
+function getClientBase(clientId) {
+  return self.clients.get(clientId).then(client => {
+    if (!client.base) {
+      const encodeUrl = client.url.substr(client.url.lastIndexOf('/') + 1);
+      const urlStr = decodeUrl(encodeUrl);
+      client.base = new URL(urlStr);
+    }
+    return client.base;
+  });
 }

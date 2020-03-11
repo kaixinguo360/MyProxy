@@ -24,7 +24,6 @@ function fakeFunction(object, key, fakeFunction) {
 
 // ----- Init ----- //
 export default function init(href) {
-  log('API_HOOK', `INIT ${href}`);
   const urlObj = new URL(href);
 
   let __location = new ULocation(href);
@@ -36,9 +35,11 @@ export default function init(href) {
 
   // TODO
   fakeFunction(window, 'open', (raw, url, ...args) => raw(proxy(url), ...args));
-  fakeFunction(history, 'replaceState');
-  fakeFunction(history, 'pushState');
+  fakeFunction(history, 'replaceState', (raw, data, title, url) => raw.call(history, data, title, proxy(url)));
+  fakeFunction(history, 'pushState', (raw, data, title, url) => raw.call(history, data, title, proxy(url)));
   fakeProperty(document, 'domain', urlObj.hostname);
   fakeProperty(document, 'URL', urlObj.href);
 
+  // Log
+  log('API_HOOK', 'INIT');
 }
