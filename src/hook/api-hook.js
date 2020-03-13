@@ -11,7 +11,8 @@ function fakeProperty(object, key, fakeValue) {
     set(value) {
       log('Fake Property', `SET ${object}.${key} (=${value})`);
       fakeValue = value;
-    }
+    },
+    configurable: true
   });
 }
 function fakeFunction(object, key, fakeFunction) {

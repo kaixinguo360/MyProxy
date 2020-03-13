@@ -1,10 +1,11 @@
 const path = require('path');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
   entry: {
-    'hook': './app/main.js',
-    'hook-sw': './app/sw.js'
+    'hook': './src/main.js',
+    'hook-sw': './src/sw.js'
   },
   output: {
     path: path.resolve(__dirname, 'dist/proxy'),
@@ -15,23 +16,18 @@ module.exports = {
   module: {
     rules: [
       { test: /\.txt$/, use: 'raw-loader' },
-      { test: /\.m?js$/, exclude: /node_modules/, use: 'babel-loader' },
+      { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+      { test: /\.vue$/, loader: 'vue-loader' },
       { test: /\.css$/, use: [
         { loader: 'style-loader' },
-        {
-          loader: 'css-loader',
-          options: {
-            modules: {
-              localIdentName: '[name]_[local]_[hash:base64:5]'
-            }
-          }
-        },
+        { loader: 'css-loader' },
         { loader: 'postcss-loader' }
       ]}
     ]
   },
   plugins: [
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new VueLoaderPlugin()
   ],
   optimization: {
     nodeEnv: 'production'

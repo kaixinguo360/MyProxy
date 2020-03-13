@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import styles from '../ui/hook.css';
+import styles from '../app/root-component.css';
 import React from 'react';
 import {render} from 'react-dom';
 
