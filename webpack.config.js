@@ -3,11 +3,6 @@ const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
-  resolve: {
-    alias: {
-      'vue$': 'vue/dist/vue.esm.js' // 用 webpack 1 时需用 'vue/dist/vue.common.js'
-    }
-  },
   entry: {
     'hook': './src/main.js',
     'hook-sw': './src/sw.js'
@@ -22,6 +17,7 @@ module.exports = {
     rules: [
       { test: /\.txt$/, use: 'raw-loader' },
       { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+      { test: /\.ts$/, exclude: /node_modules/, use: 'ts-loader' },
       { test: /\.vue$/, loader: 'vue-loader' },
       { test: /\.css$/, use: [
         { loader: 'style-loader' },
@@ -34,6 +30,10 @@ module.exports = {
     new CleanWebpackPlugin(),
     new VueLoaderPlugin()
   ],
+  resolve: {
+    alias: { 'vue$': 'vue/dist/vue.esm.js' },
+    extensions: [ '.ts', '.js' ]
+  },
 
   devtool: 'eval-source-map',
   devServer: {

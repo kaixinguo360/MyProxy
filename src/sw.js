@@ -1,4 +1,4 @@
-import {absUrl, decodeUrl, proxy} from './utils';
+import {absUrl, decodeUrl, proxy} from './utils/url-utils';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('fetch', e => e.respondWith(handleFetch(e)));

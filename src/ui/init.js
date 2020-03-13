@@ -1,8 +1,8 @@
 import $ from 'jquery'
 import Vue from 'vue';
 
-import {log} from '../utils';
 import RootComponent from './root-component.vue';
+import {log} from "../utils/log-utils";
 
 // ----- Init ----- //
 export default function init() {

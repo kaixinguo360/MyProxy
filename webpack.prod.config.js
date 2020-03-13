@@ -17,6 +17,7 @@ module.exports = {
     rules: [
       { test: /\.txt$/, use: 'raw-loader' },
       { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
+      { test: /\.ts$/, exclude: /node_modules/, use: 'ts-loader' },
       { test: /\.vue$/, loader: 'vue-loader' },
       { test: /\.css$/, use: [
         { loader: 'style-loader' },
@@ -29,6 +30,9 @@ module.exports = {
     new CleanWebpackPlugin(),
     new VueLoaderPlugin()
   ],
+  resolve: {
+    extensions: [ '.ts', '.js' ]
+  },
   optimization: {
     nodeEnv: 'production'
   }

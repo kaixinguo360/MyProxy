@@ -1,13 +1,6 @@
 
 // ----- Util Functions ----- //
 
-export function log(flag, ...messages) {
-  console.log('[' + flag + ']', ...messages);
-}
-export function debug(flag, ...messages) {
-  console.debug('[' + flag + ']', ...messages);
-}
-
 export function encodeUrl(url) {
   return btoa(url)
     .replace(/\+/g, '-')
@@ -40,7 +33,7 @@ export function isAbsUrl(url) {
 
 export function proxy(url, base) {
   const urlStr = absUrl(url, base);
-  
+
   if (urlStr.startsWith(location.origin + '/proxy/')) {
     return urlStr;
   } else if (urlStr.startsWith(location.origin)) {
@@ -53,4 +46,27 @@ export function proxy(url, base) {
 }
 export function isProxied(url) {
   return url.startsWith(location.origin + '/proxy/');
+}
+
+export function direct(url, base) {
+  const urlStr = absUrl(url, base);
+
+  if (urlStr.startsWith(location.origin + '/proxy/')) {
+    if (urlStr.startsWith(location.origin + '/proxy/static/')) {
+      const encodeUrl = urlStr.substr((location.origin + '/proxy/static/').length);
+      return decodeUrl(encodeUrl);
+    } else if (urlStr.startsWith(location.origin + '/proxy/page/')) {
+      const encodeUrl = urlStr.substr((location.origin + '/proxy/page/').length);
+      return decodeUrl(encodeUrl);
+    } else {
+      throw new Error(`Can not decode this url: ${url}`);
+    }
+  } else if (urlStr.startsWith(location.origin)) {
+    return (base ? base.origin : ORIGIN) + urlStr.substr(location.origin.length);
+  } else {
+    return urlStr;
+  }
+}
+export function isDirect(url) {
+  return isAbsUrl(url) && !url.startsWith(location.origin);
 }

@@ -1,11 +1,11 @@
 <template>
-  <div class="root">{{hello}}</div>
+  <div class="root">{{resourceService.size}}</div>
 </template>
 
 <script>
 export default {
   data: () => ({
-    hello: 'Hello, world!'
+    resourceService: window.resourceService
   })
 }
 </script>
