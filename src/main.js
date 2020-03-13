@@ -10,7 +10,7 @@ import initUI from './app/init';
   window.initialized = true;
 
   const href = ORIGIN + PATH;
-  log('INIT', `${href}`);
+  log('INIT', href);
 
   initServiceWorker();
   initApiHook(href);

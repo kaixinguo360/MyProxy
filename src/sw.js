@@ -6,21 +6,22 @@ self.addEventListener('fetch', e => e.respondWith(handleFetch(e)));
 // ----- Handlers ----- //
 function handleFetch(event) {
   const request = event.request;
-  
+
   if (request.url.startsWith(location.origin)) {
     const path = request.url.substr(location.origin.length);
     if (path.startsWith('/proxy/hook.js') || path.startsWith('/proxy/add') || path.startsWith('/sockjs-node/')) {
       return fetch(request);
     } else if (path.startsWith('/proxy/')) {
-      return handleSamePathUrl(event, request);
+      return handleFetch_SamePath(event);
     } else {
-      return handleSameOriginUrl(event, request);
+      return handleFetch_SameOrigin(event);
     }
   } else {
-    return fetchResponse(request.url, request);
+    return handleRequest(event, request.url);
   }
 }
-function handleSamePathUrl(event, request) {
+function handleFetch_SamePath(event) {
+  const request = event.request;
   let encodeUrl, url;
 
   // get encodeUrl
@@ -36,64 +37,71 @@ function handleSamePathUrl(event, request) {
   } catch (e) {
     return getClientBase(event.clientId).then(base => {
       const urlStr = absUrl(encodeUrl, base);
-      return fetchResponse(urlStr, request);
+      return handleRequest(event, urlStr);
     });
   }
 
   const base = new URL(url);
   return fetch(request)
-    .then(res => processResponse(res, request, base))
+    .then(res => handleResponse(event, res, base))
     .catch(() => makeRes('fetch failed', 504));
 }
-function handleSameOriginUrl(event, request) {
+function handleFetch_SameOrigin(event) {
   return getClientBase(event.clientId).then(base => {
     const origin = base.origin;
-    const path = request.url.substr(location.origin.length);
+    const path = event.request.url.substr(location.origin.length);
     const urlStr = origin + path;
-    return fetchResponse(urlStr, request);
+    return handleRequest(event, urlStr);
   });
 }
 
 // ----- Response ----- //
-function fetchResponse(url, request) {
+function handleRequest(event, url) {
+  const request = event.request;
   const base = new URL(url);
   const proxyUrl = proxy(url, base);
   const req = new Request(proxyUrl, request);
+
+  postMessage(event.clientId, 'request', {
+    destination: request.destination, url
+  });
+
   return fetch(req)
-    .then(res => processResponse(res, request, base))
+    .then(res => handleResponse(event, res, base))
     .catch(() => makeRes('fetch failed', 504));
 }
-function processResponse(response, request, base) {
+function handleResponse(event, response, base) {
+  const request = event.request;
   switch (request.destination) {
-    
+
     case 'script':
       return response.text().then(text => {
         const body = text.replace(/location/g, '__location');
         return makeRes(body, 200, response.headers);
       });
-      
+
     case 'document':
       return response.text().then(text => {
         const origin = base.origin;
         const path = base.href.substr(base.origin.length);
         const body = text
-          
+
           // location -> __location
           .replace(/([^.])location/g, '$1__location')
           .replace(/(window\s*\.\s*)location/g, '$1__location')
           .replace(/(document\s*\.\s*)location/g, '$1__location')
-          
+
           // <meta...> -> null
           .replace(/<meta[^<>]+name=['"]referrer['"][^<>]+>/g, '')
-          
+
           // hook.js -> <head...>
           .replace(/<\s*head[^>]*>/g, `<head>\n`
-            + `<script>ORIGIN='${origin}';PATH='${path}';</script>\n` 
+            + `<script>ORIGIN='${origin}';PATH='${path}';</script>\n`
             + `<script src='/proxy/hook.js'></script>\n`
             + `<meta name='referrer' content='never'>\n`);
         return makeRes(body, 200, response.headers);
       });
-      
+
     case 'style':
       return response.text().then(text => {
         text = text.replace(
@@ -102,7 +110,7 @@ function processResponse(response, request, base) {
         );
         return makeRes(text, 200, response.headers);
       });
-      
+
     default:
       return response;
   }
@@ -121,5 +129,10 @@ function getClientBase(clientId) {
       client.base = new URL(urlStr);
     }
     return client.base;
+  });
+}
+function postMessage(clientId, type, data) {
+  return self.clients.get(clientId).then(client => {
+    client.postMessage({ type, data });
   });
 }
