@@ -1,10 +1,13 @@
+/// <reference lib="WebWorker" />
 import {absUrl, decodeUrl, proxy} from './utils/url-utils';
+
+declare var self: ServiceWorkerGlobalScope;
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('fetch', e => e.respondWith(handleFetch(e)));
 
 // ----- Handlers ----- //
-function handleFetch(event) {
+function handleFetch(event: FetchEvent) {
   const request = event.request;
 
   if (request.url.startsWith(location.origin)) {
@@ -20,18 +23,21 @@ function handleFetch(event) {
     return handleRequest(event, request.url);
   }
 }
-function handleFetch_SamePath(event) {
+function handleFetch_SamePath(event: FetchEvent) {
   const request = event.request;
-  let encodeUrl, url;
 
   // get encodeUrl
+  let encodeUrl: string;
   if (request.url.startsWith(location.origin + '/proxy/static/')) {
     encodeUrl = request.url.substr((location.origin + '/proxy/static/').length);
   } else if (request.url.startsWith(location.origin + '/proxy/page/')) {
     encodeUrl = request.url.substr((location.origin + '/proxy/page/').length);
+  } else {
+    throw new Error(`Can't recognize this url: ${request.url}`);
   }
 
   // get url
+  let url: string;
   try {
     url = decodeUrl(encodeUrl);
   } catch (e) {
@@ -46,7 +52,7 @@ function handleFetch_SamePath(event) {
     .then(res => handleResponse(event, res, base))
     .catch(() => makeRes('fetch failed', 504));
 }
-function handleFetch_SameOrigin(event) {
+function handleFetch_SameOrigin(event: FetchEvent) {
   return getClientBase(event.clientId).then(base => {
     const origin = base.origin;
     const path = event.request.url.substr(location.origin.length);
@@ -56,7 +62,7 @@ function handleFetch_SameOrigin(event) {
 }
 
 // ----- Response ----- //
-function handleRequest(event, url) {
+function handleRequest(event: FetchEvent, url: string) {
   const request = event.request;
   const base = new URL(url);
   const proxyUrl = proxy(url, base);
@@ -70,7 +76,7 @@ function handleRequest(event, url) {
     .then(res => handleResponse(event, res, base))
     .catch(() => makeRes('fetch failed', 504));
 }
-function handleResponse(event, response, base) {
+function handleResponse(event: FetchEvent, response: Response, base: URL) {
   const request = event.request;
   switch (request.destination) {
 
@@ -95,7 +101,7 @@ function handleResponse(event, response, base) {
           .replace(/<meta[^<>]+name=['"]referrer['"][^<>]+>/g, '')
 
           // hook.js -> <head...>
-          .replace(/<\s*head[^>]*>/g, `<head>\n`
+          .replace(/(<\s*head[^>]*>)/g, `$1\n`
             + `<script>ORIGIN='${origin}';PATH='${path}';</script>\n`
             + `<script src='/proxy/hook.js'></script>\n`
             + `<meta name='referrer' content='never'>\n`);
@@ -117,11 +123,11 @@ function handleResponse(event, response, base) {
 }
 
 // ----- Utils ----- //
-function makeRes(body, status = 200, headers = {}) {
+function makeRes(body: any, status = 200, headers: any = {}) {
   headers['access-control-allow-origin'] = '*';
   return new Response(body, {status, headers});
 }
-function getClientBase(clientId) {
+function getClientBase(clientId: string) {
   return self.clients.get(clientId).then(client => {
     if (!client.base) {
       const encodeUrl = client.url.substr(client.url.lastIndexOf('/') + 1);
@@ -131,7 +137,7 @@ function getClientBase(clientId) {
     return client.base;
   });
 }
-function postMessage(clientId, type, data) {
+function postMessage(clientId: string, type: string, data: any) {
   return self.clients.get(clientId).then(client => {
     client.postMessage({ type, data });
   });

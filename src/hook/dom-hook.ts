@@ -19,7 +19,7 @@ export class DomHook {
           case "attributes":
             this.attributesMutationHandler(mutation); break;
           case "childList":
-            Array.from(mutation.addedNodes).forEach((node: HTMLElement) => this.childNodeHandler(node)); break;
+            Array.from(mutation.addedNodes).forEach(node => this.childNodeHandler(node)); break;
         }
       }
     });
@@ -36,15 +36,22 @@ export class DomHook {
 
   // ----- Mutation Handlers ----- //
   private attributesMutationHandler(mutation: MutationRecord) {
-    const node = mutation.target as HTMLElement;
+    const node = mutation.target;
     const attribute = mutation.attributeName;
+    if (!(node instanceof HTMLElement)) {
+      throw new Error('Node is not a HTMLElement');
+    }
+    if (!attribute) {
+      throw new Error(`Attribute name is null.`);
+    }
     this.detectResource(node);
     this.proxyNode(node, attribute);
   }
-  private childNodeHandler(node: HTMLElement) {
-    if (!node.tagName) { return; }
+  private childNodeHandler(node: Node) {
+    if (!(node instanceof HTMLElement && node.tagName)) {
+      return;
+    }
     this.detectResource(node);
-
     switch (node.tagName) {
       case 'IMG':
         this.proxyNode(node, 'src'); break;
@@ -53,17 +60,16 @@ export class DomHook {
       case 'FORM':
         this.proxyNode(node, 'action'); break;
     }
-
-    node.childNodes.forEach((node: HTMLElement) => this.childNodeHandler(node));
+    node.childNodes.forEach(node => this.childNodeHandler(node));
   }
 
   // ----- Utils Functions ----- //
-  private proxyNode(node: any, attribute: string) {
-    const url = node[attribute];
+  private proxyNode(node: HTMLElement, attribute: string) {
+    const url = (node as any)[attribute];
     if (!isProxied(url)) {
       const proxied = proxy(url);
       debug('DOM_HOOK', `${node.tagName}.${attribute}\n-> ${url}\n<- ${proxied}`, node);
-      node[attribute] = proxied;
+      (node as any)[attribute] = proxied;
     }
   }
 
@@ -74,12 +80,19 @@ export class DomHook {
     }
   }
   private addImage(node: HTMLElement) {
-    const image = node as HTMLImageElement;
+    if (!(node instanceof HTMLImageElement)) {
+      throw new Error('Node is not a HTMLImageElement');
+    }
+
+    // Detect basic info of image
+    const image = node;
     const url = direct(image.src);
-    if (!url || url === this.href) { return; }
+    if (!url || url === this.href) {
+      return;
+    }
 
+    // Detect description of image
     let description = image.alt || image.title;
-
     function detectSiblings(cur: ChildNode) {
       while (cur.nextSibling) {
         // log('Sibling===========')
@@ -93,27 +106,24 @@ export class DomHook {
     function detectParent(parent: HTMLElement) {
       description = parent.title;
     }
-
-    // Detect description of image, Try 1
     if (!description) {
       let cur: HTMLElement = node;
-      while (!description && cur) {
+      while (!description) {
         const parent = cur.parentElement;
         if (parent && parent.childElementCount === 1) {
           detectParent(parent);
         } else {
           detectSiblings(cur);
         }
-        cur = cur.parentElement;
+        if (cur.parentElement) {
+          cur = cur.parentElement;
+        } else {
+          break;
+        }
       }
     }
 
-    // Detect description of image, Try 2
-    if (!description) {
-      let parent: HTMLElement = node.parentElement;
-      description = parent.title;
-    }
-
+    // Send to resource service
     this.resourceService.add({ type: 'image', url, description, source: this.href });
   }
 }

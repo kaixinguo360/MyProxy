@@ -30,6 +30,7 @@
     "webpack-dev-server": "^3.10.3"
   },
   "dependencies": {
+    "@types/jquery": "^3.3.33",
     "jquery": "^3.4.1",
     "ulocation": "^0.8.0",
     "vue": "^2.6.11"

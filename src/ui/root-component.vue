@@ -2,7 +2,10 @@
   <div class="root">{{resourceService.size}}</div>
 </template>
 
-<script>
+<script lang="ts">
+  import {ModifiedWindow} from '../main';
+
+  declare var window: ModifiedWindow;
 export default {
   data: () => ({
     resourceService: window.resourceService

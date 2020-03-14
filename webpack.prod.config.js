@@ -4,8 +4,8 @@ const VueLoaderPlugin = require('vue-loader/lib/plugin');
 
 module.exports = {
   entry: {
-    'hook': './src/main.js',
-    'hook-sw': './src/sw.js'
+    'hook': './src/main.ts',
+    'hook-sw': './src/sw.ts'
   },
   output: {
     path: path.resolve(__dirname, 'dist/proxy'),
@@ -15,9 +15,9 @@ module.exports = {
   mode: 'production',
   module: {
     rules: [
-      { test: /\.txt$/, use: 'raw-loader' },
-      { test: /\.js$/, exclude: /node_modules/, use: 'babel-loader' },
-      { test: /\.ts$/, exclude: /node_modules/, use: 'ts-loader' },
+      { test: /\.txt$/, loader: 'raw-loader' },
+      { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
+      { test: /\.ts$/, exclude: /node_modules/, loader: 'ts-loader', options: { appendTsSuffixTo: [/\.vue$/] } },
       { test: /\.vue$/, loader: 'vue-loader' },
       { test: /\.css$/, use: [
         { loader: 'style-loader' },

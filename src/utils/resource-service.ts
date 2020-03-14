@@ -1,6 +1,6 @@
 import {debug} from './log-utils';
 
-export class Resource {
+export interface Resource {
   url: string;
   type: 'image' | 'video' | 'audio';
   source?: string;
@@ -14,10 +14,12 @@ export class ResourceService {
   public size = this.resources.size;
 
   public add(resource: Resource) {
+    if (resource.url.startsWith(location.origin)) {
+      return;
+    }
     const key = resource.url;
-    if (key.startsWith(location.origin)) { return; }
-    if (this.resources.has(key)) {
-      const old = this.resources.get(key);
+    const old = this.resources.get(key);
+    if (old) {
       if (resource.title && resource.title !== old.title) {
         old.title = resource.title;
         debug('RESOURCE', `UPDATE [${this.resources.size}] title\n${key}\n${resource.title}`);

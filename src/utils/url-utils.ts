@@ -1,16 +1,19 @@
 
 // ----- Util Functions ----- //
 
-export function encodeUrl(url) {
+declare var ORIGIN: string;
+declare var PATH: string;
+
+export function encodeUrl(url: string) {
   return btoa(url)
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
 }
-export function decodeUrl(url) {
+export function decodeUrl(url: string) {
   return atob(url.replace(/-/g, '+').replace(/_/g, '/'));
 }
 
-export function absUrl(url, base) {
+export function absUrl(url: string, base?: URL) {
   const origin = base ? base.origin : ORIGIN;
   const path = base ? base.href.substr(base.origin.length) : PATH;
   if (url === null || url === undefined) {
@@ -27,11 +30,11 @@ export function absUrl(url, base) {
     return origin + path;
   }
 }
-export function isAbsUrl(url) {
+export function isAbsUrl(url: string) {
   return (url.startsWith('http://') || url.startsWith('https://'));
 }
 
-export function proxy(url, base) {
+export function proxy(url: string, base?: URL) {
   const urlStr = absUrl(url, base);
 
   if (urlStr.startsWith(location.origin + '/proxy/')) {
@@ -44,11 +47,11 @@ export function proxy(url, base) {
     return `${location.origin}/proxy/static/${encodeUrl(urlStr)}`;
   }
 }
-export function isProxied(url) {
+export function isProxied(url: string) {
   return url.startsWith(location.origin + '/proxy/');
 }
 
-export function direct(url, base) {
+export function direct(url: string, base?: URL) {
   const urlStr = absUrl(url, base);
 
   if (urlStr.startsWith(location.origin + '/proxy/')) {
@@ -67,6 +70,6 @@ export function direct(url, base) {
     return urlStr;
   }
 }
-export function isDirect(url) {
+export function isDirect(url: string) {
   return isAbsUrl(url) && !url.startsWith(location.origin);
 }
