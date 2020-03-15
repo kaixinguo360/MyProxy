@@ -1,5 +1,6 @@
 import {debug} from './log-utils';
 import {direct} from './url-utils';
+import {savePage, saveResource, saveResources} from './node-uitl';
 
 export interface Resource {
   url: string;
@@ -16,6 +17,7 @@ export class ResourceService {
 
   public readonly resources = new Map<string, Resource>();
   public size = 0;
+  public selected = 0;
 
   public add(resource: Resource) {
     if (resource.url.startsWith(location.origin)) {
@@ -34,24 +36,53 @@ export class ResourceService {
       }
     } else {
       this.resources.set(key, resource);
-      this.updateSize();
+      this.update();
       debug('RESOURCE', `ADD [${this.resources.size}]\n${key}\n${resource.description}`);
     }
   }
-
   public hide(key: string) {
     const resource = this.resources.get(key);
     if (resource) {
       resource.hide = true;
-      this.updateSize();
+      this.update();
     }
+  }
+
+  public select(key: string) {
+    const resource = this.resources.get(key);
+    if (resource) {
+      resource.selected = !resource.selected;
+      this.update();
+    }
+  }
+  public selectAll() {
+    const allSelected = this.size === this.selected;
+    this.getAll().forEach(r => {
+      r.selected = !allSelected;
+    });
+    this.update();
   }
 
   public getAll() {
     return Array.from(this.resources.values()).filter(r => !r.hide);
   }
-  
-  private updateSize() {
+  public getAllSelected() {
+    return this.getAll().filter(r => r.selected);
+  }
+
+  private update() {
     this.size = this.getAll().length;
+    this.selected = this.getAllSelected().length;
+  }
+  
+  public save() {
+    const selected = this.getAllSelected();
+    if (selected.length === 0) {
+      savePage();
+    } else if (selected.length === 1) {
+      saveResource(selected[0]);
+    } else {
+      saveResources(selected);
+    }
   }
 }

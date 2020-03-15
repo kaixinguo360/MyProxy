@@ -1,6 +1,6 @@
 <template>
   <div class="resource-container"
-       :class="{'resource-selected': selected}"
+       :class="{'resource-selected': resource.selected}"
        @click="click"
   >
     <div class="resource-entity">
@@ -22,13 +22,13 @@
     <div class="resource-title" v-if="title">{{title}}</div>
     <div class="resource-description" v-if="description">{{description}}</div>
     <div class="resource-selector">
-      <div class="resource-selector-dot" v-if="selected"></div>
+      <div class="resource-selector-dot" v-if="resource.selected"></div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Inject, Prop, Vue} from 'vue-property-decorator';
+import {Component, Inject, Prop, Vue, Watch} from 'vue-property-decorator';
 import {Resource, ResourceService} from '../utils/resource-service';
 import {debug} from '../utils/log-utils';
 
@@ -38,20 +38,15 @@ export default class CounterComponent extends Vue {
   @Prop() resource!: Resource;
   @Inject() resourceService!: ResourceService;
   
-  selected: boolean = false;
   title: string = 'loading...';
   
   get description() {
     return this.resource.description;
   };
-  
-  created() {
-    this.selected = !!this.resource.selected;
-  }
 
   click() {
-    this.resource.selected = !this.resource.selected;
-    this.selected = this.resource.selected;
+    this.resourceService.select(this.resource.url);
+    this.$forceUpdate();
   }
 
   onloadImage($event: Event) {
@@ -75,8 +70,8 @@ export default class CounterComponent extends Vue {
 
 <style scoped>
 .resource-container {
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   position: relative;
   border-radius: 12px;
   margin: 1px;
@@ -85,8 +80,8 @@ export default class CounterComponent extends Vue {
   background-color: #F5F5F5;
 }
 .resource-selected {
-  width: 96px;
-  height: 96px;
+  width: 116px;
+  height: 116px;
   border-style: solid;
   border-width: 2px;
 }

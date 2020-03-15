@@ -1,14 +1,17 @@
 <template>
-  <div class="counter" v-on:click="$emit('open')">
-    {{resourceService.size}}
+  <div class="counter">
+    <RoundButton @click="$emit('open')">{{resourceService.size}}</RoundButton>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
 import {ResourceService} from '../utils/resource-service';
+import RoundButton from './round-button-component.vue';
 
-@Component
+@Component({
+  components: {RoundButton}
+})
 export default class CounterComponent extends Vue {
   @Inject() resourceService!: ResourceService;
 }
@@ -22,15 +25,6 @@ export default class CounterComponent extends Vue {
 
   width: 44px;
   height: 44px;
-  
-  font-weight: 600;
-  font-size: 17px;
-  
-  color: #757575;
-  cursor: pointer;
-}
-.counter:hover {
-  background-color: #E0E0E0;
 }
 </style>
 
