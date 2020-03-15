@@ -11,19 +11,20 @@
 </template>
 
 <script lang="ts">
-  import {ModifiedWindow} from '../main';
-  import SearchComponent from './search-component.vue';
-  import ContentComponent from './content-component.vue';
+import {Component, Vue} from 'vue-property-decorator';
+import SearchComponent from './search-component.vue';
+import ContentComponent from './content-component.vue';
+import {ModifiedWindow} from '../main';
+declare var window: ModifiedWindow;
 
-  declare var window: ModifiedWindow;
-  export default {
-  data: () => ({
-    resourceService: window.resourceService
-  }),
+@Component({
   components: {
     SearchComponent,
     ContentComponent
-  },
+  }
+})
+export default class ContainerComponent extends Vue {
+  resourceService = window.resourceService;
 }
 </script>
 

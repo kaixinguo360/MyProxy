@@ -1,17 +1,34 @@
 <template>
   <div class="root">
-    <ContainerComponent v-if="isOpen" @close="isOpen=false"></ContainerComponent>
-    <CounterComponent v-else @open="isOpen=true"></CounterComponent>
+    <ContainerComponent v-if="isOpen" @close="setOpen(false)"></ContainerComponent>
+    <CounterComponent v-else @open="setOpen(true)"></CounterComponent>
   </div>
 </template>
 
 <script lang="ts">
-  import ContainerComponent from './container-component.vue';
-  import CounterComponent from './counter-component.vue';
+import {Component, Vue} from 'vue-property-decorator'
+import ContainerComponent from './container-component.vue';
+import CounterComponent from './counter-component.vue';
 
-  export default {
-  data: () => ({isOpen: false}),
-  components: {ContainerComponent, CounterComponent},
+@Component({
+  components: {
+    ContainerComponent,
+    CounterComponent
+  }
+})
+export default class RootComponent extends Vue {
+  
+  isOpen: boolean;
+  
+  constructor() {
+    super();
+    this.isOpen = Boolean(localStorage.getItem('proxy_ui@isOpen'));
+  }
+  
+  setOpen(isOpen: boolean) {
+    isOpen ? localStorage.setItem('proxy_ui@isOpen', 'true') : localStorage.removeItem('proxy_ui@isOpen');
+    this.isOpen = isOpen;
+  }
 }
 </script>
 

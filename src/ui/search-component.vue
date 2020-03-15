@@ -6,18 +6,19 @@
 </template>
 
 <script lang="ts">
-  import {ModifiedWindow} from '../main';
-  import {proxy} from '../utils/url-utils';
+import {Component, Vue} from 'vue-property-decorator';
+import {proxy} from '../utils/url-utils';
+import {ModifiedWindow} from '../main';
+declare var window: ModifiedWindow;
 
-  declare var window: ModifiedWindow;
-export default {
-  data: () => ({
-    url: window.__location?.href
-  }),
-  methods: {
-    submit(url: string) {
-      location.href = proxy(url);
-    }
+@Component
+export default class SearchComponent extends Vue {
+  
+  url = window.__location?.href;
+  
+  submit(url: string) {
+    localStorage.removeItem('proxy_ui@isOpen');
+    location.href = proxy(url);
   }
 }
 </script>

@@ -1,5 +1,5 @@
 import ULocation from 'ulocation';
-import {proxy} from '../utils/url-utils';
+import {absUrl, proxy} from '../utils/url-utils';
 import {log} from '../utils/log-utils';
 
 export class ApiHook {
@@ -7,29 +7,40 @@ export class ApiHook {
   // ----- Init ----- //
   constructor(href: string) {
     const urlObj = new URL(href);
+    const __location = this.createFakeLocation(href);
 
-    // TODO
-    this.createFakeLocation(href);
-    this.fakeFunction(window, 'open', (raw, url, ...args) => raw(proxy(url), ...args));
-    this.fakeFunction(history, 'replaceState', (raw, data, title, url) => raw.call(history, data, title, proxy(url)));
-    this.fakeFunction(history, 'pushState', (raw, data, title, url) => raw.call(history, data, title, proxy(url)));
+    // history
+    this.fakeFunction(history, 'replaceState', (raw, data, title, url) => {
+      __location.href = absUrl(url);
+      raw.call(history, data, title, proxy(url));
+    });
+    this.fakeFunction(history, 'pushState', (raw, data, title, url) => {
+      __location.href = absUrl(url);
+      raw.call(history, data, title, proxy(url));
+    });
+
+    // document
     this.fakeProperty(document, 'domain', urlObj.hostname);
     this.fakeProperty(document, 'URL', urlObj.href);
 
+    // window
+    this.fakeFunction(window, 'open', (raw, url, ...args) => raw(proxy(url), ...args));
+    
     // Log
     log('API_HOOK', 'INIT');
   }
 
   // ----- Utils Functions ----- //
-  createFakeLocation(href: string) {
+  public createFakeLocation(href: string): Location {
     let __location = new ULocation(href);
     __location.reload = () => location.reload();
     __location.replace = (url: string) => location.replace(url);
     __location.__proto__ = Location.prototype;
     (window as any).__location = __location;
     (document as any).__location = __location;
+    return __location;
   }
-  fakeProperty(object: any, key: string, fakeValue: any) {
+  public fakeProperty(object: any, key: string, fakeValue: any) {
     Object.defineProperty(object, key, {
       get() {
         log('Fake Property', `GET ${object}.${key} (=${fakeValue})`);
@@ -42,7 +53,7 @@ export class ApiHook {
       configurable: true
     });
   }
-  fakeFunction(object: any, key: string, fakeFunction: (raw: (...args: any) => any, ...args: any) => any) {
+  public fakeFunction(object: any, key: string, fakeFunction: (raw: (...args: any) => any, ...args: any) => any) {
     const raw = object[key];
     object[key] = (...args: any[]) => {
       log('Fake Function', `CALL ${object}.${key}(${args.join(', ')})`);

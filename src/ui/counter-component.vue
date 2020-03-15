@@ -5,12 +5,14 @@
 </template>
 
 <script lang="ts">
-  import {ModifiedWindow} from '../main';
+import {Component, Vue} from 'vue-property-decorator';
+import {ModifiedWindow} from '../main';
+declare var window: ModifiedWindow;
 
-  declare var window: ModifiedWindow;
-export default { data: () => ({
-    resourceService: window.resourceService
-}) }
+@Component
+export default class CounterComponent extends Vue {
+  resourceService = window.resourceService;
+}
 </script>
 
 <style scoped>
