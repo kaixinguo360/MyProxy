@@ -6,9 +6,11 @@
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator'
+import {Component, Provide, Vue} from 'vue-property-decorator'
 import ContainerComponent from './container-component.vue';
 import CounterComponent from './counter-component.vue';
+import {ModifiedWindow} from '../main';
+declare var window: ModifiedWindow;
 
 @Component({
   components: {
@@ -19,6 +21,7 @@ import CounterComponent from './counter-component.vue';
 export default class RootComponent extends Vue {
   
   isOpen: boolean;
+  @Provide() resourceService = window.resourceService;
   
   constructor() {
     super();

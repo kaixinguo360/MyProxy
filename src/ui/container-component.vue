@@ -6,25 +6,24 @@
         {{resourceService.size}}
       </button>
     </div>
-    <ContentComponent class="content-container"></ContentComponent>
+    <ResourcesComponent class="content-container"></ResourcesComponent>
   </div>
 </template>
 
 <script lang="ts">
-import {Component, Vue} from 'vue-property-decorator';
+import {Component, Inject, Vue} from 'vue-property-decorator';
 import SearchComponent from './search-component.vue';
-import ContentComponent from './content-component.vue';
-import {ModifiedWindow} from '../main';
-declare var window: ModifiedWindow;
+import ResourcesComponent from './resources-component.vue';
+import {ResourceService} from '../utils/resource-service';
 
 @Component({
   components: {
     SearchComponent,
-    ContentComponent
+    ResourcesComponent
   }
 })
 export default class ContainerComponent extends Vue {
-  resourceService = window.resourceService;
+  @Inject() resourceService!: ResourceService;
 }
 </script>
 

@@ -1,4 +1,5 @@
 import {debug} from './log-utils';
+import {direct} from './url-utils';
 
 export interface Resource {
   url: string;
@@ -6,18 +7,21 @@ export interface Resource {
   source?: string;
   title?: string;
   description?: string;
+
+  hide?: boolean;
+  selected?: boolean;
 }
 
 export class ResourceService {
 
   public readonly resources = new Map<string, Resource>();
-  public size = this.resources.size;
+  public size = 0;
 
   public add(resource: Resource) {
     if (resource.url.startsWith(location.origin)) {
       return;
     }
-    const key = resource.url;
+    const key = direct(resource.url);
     const old = this.resources.get(key);
     if (old) {
       if (resource.title && resource.title !== old.title) {
@@ -30,17 +34,24 @@ export class ResourceService {
       }
     } else {
       this.resources.set(key, resource);
-      this.size = this.resources.size;
+      this.updateSize();
       debug('RESOURCE', `ADD [${this.resources.size}]\n${key}\n${resource.description}`);
     }
   }
 
-  public remove(key: string) {
-    this.resources.delete(key);
-    this.size = this.resources.size;
+  public hide(key: string) {
+    const resource = this.resources.get(key);
+    if (resource) {
+      resource.hide = true;
+      this.updateSize();
+    }
   }
 
   public getAll() {
-    return this.resources.values();
+    return Array.from(this.resources.values()).filter(r => !r.hide);
+  }
+  
+  private updateSize() {
+    this.size = this.getAll().length;
   }
 }

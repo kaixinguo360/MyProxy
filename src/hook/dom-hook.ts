@@ -122,6 +122,10 @@ export class DomHook {
         }
       }
     }
+    
+    if (description) {
+      description = description.trim();
+    }
 
     // Send to resource service
     this.resourceService.add({ type: 'image', url, description, source: this.href });
