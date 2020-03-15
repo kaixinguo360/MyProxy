@@ -34,4 +34,5 @@ export class ModifiedWindow extends Window {
   public domHook?: DomHook;
   public swHook?: ServiceWorkerHook;
   public apiHook?: ApiHook;
+  public __location?: Location;
 }
