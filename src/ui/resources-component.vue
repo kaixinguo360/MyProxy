@@ -1,15 +1,15 @@
 <template>
   <div class="resources-container">
-    <div class="resources-selector-buttons">
-      <RoundButton @click="selectAll">{{selectButtonText}}</RoundButton>
-      <RoundButton @click="resourceService.save()">Save</RoundButton>
-    </div>
     <div class="resource-components-container">
       <ResourceComponent
         v-for="resource of resources"
         :resource="resource"
         :key="key(resource)"
       ></ResourceComponent>
+    </div>
+    <div class="resources-selector-buttons">
+      <RoundButton @click="selectAll">{{selectButtonText}}</RoundButton>
+      <RoundButton @click="resourceService.save()">Save</RoundButton>
     </div>
   </div>
 </template>
@@ -59,17 +59,19 @@ export default class ContentComponent extends Vue {
 </script>
 
 <style scoped>
+.resources-container {
+  height: calc(100% - 38px);
+}
 .resources-selector-buttons {
   width: 100%;
-  margin: 4px 0 6px;
+  margin: 6px 0 4px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
 .resource-components-container {
-  width: 100%;
   max-width: 732px;
-  max-height: calc(100vh - 140px);
+  max-height: calc(100% - 40px);
   margin: 4px;
   display: flex;
   flex-wrap: wrap;

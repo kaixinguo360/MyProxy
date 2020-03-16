@@ -1,9 +1,6 @@
 <template>
   <div class="container">
-    <div class="head-container">
-      <SearchComponent class="search-container"></SearchComponent>
-      <RoundButton @click="$emit('close')">{{resourceService.size}}</RoundButton>
-    </div>
+    <SearchComponent class="search-container"></SearchComponent>
     <ResourcesComponent></ResourcesComponent>
   </div>
 </template>
@@ -33,15 +30,10 @@ export default class ContainerComponent extends Vue {
   flex-direction: column;
   align-items: stretch;
   padding: 8px;
-}
-.head-container {
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-end;
-  margin-bottom: 4px;
+  height: calc(100% - 16px);
 }
 .search-container {
-  flex: 1 1 auto;
+  margin-bottom: 4px;
 }
 </style>
 

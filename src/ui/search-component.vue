@@ -1,6 +1,8 @@
 <template>
   <div class="search-box">
-    <input class="search-input" v-model="url" @keyup.enter="submit(url)"/>
+    <input class="search-input" v-model="url"
+           @keyup.enter="submit(url)"
+           @mousedown="$event.stopPropagation()"/>
     <RoundButton @click="submit(url)">Go</RoundButton>
   </div>
 </template>
@@ -37,7 +39,7 @@ export default class SearchComponent extends Vue {
 .search-input {
   flex: 1 1 auto;
   
-  width: 300px;
+  width: 200px;
   height: 30px;
   padding: 0 10px;
   margin-right: 4px;
