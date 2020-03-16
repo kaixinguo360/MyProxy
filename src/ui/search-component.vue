@@ -1,9 +1,10 @@
 <template>
   <div class="search-box">
     <input class="search-input" v-model="url"
-           @keyup.enter="submit(url)"
+           @keyup.enter="location.href=proxiedUrl"
            @mousedown="$event.stopPropagation()"/>
-    <RoundButton @click="submit(url)">Go</RoundButton>
+    <a :href="proxiedUrl" target="_self"><RoundButton>Go</RoundButton></a>
+    <RoundButton @click="location.href=url">To</RoundButton>
   </div>
 </template>
 
@@ -20,10 +21,10 @@ declare var window: ModifiedWindow;
 export default class SearchComponent extends Vue {
   
   url = window.__location?.href;
+  location = window.location;
   
-  submit(url: string) {
-    localStorage.removeItem('proxy_ui@isOpen');
-    location.href = proxy(url);
+  get proxiedUrl() {
+    return proxy(this.url!);
   }
 }
 </script>
@@ -35,6 +36,9 @@ export default class SearchComponent extends Vue {
   height: 30px;
   margin: 0 4px;
   overflow: auto;
+}
+.search-box > a {
+  text-decoration: none;
 }
 .search-input {
   flex: 1 1 auto;

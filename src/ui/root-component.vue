@@ -4,7 +4,7 @@
     <div class="panel root-container" ref="container" v-show="isOpen">
       <ContainerComponent @close="close()"></ContainerComponent>
     </div>
-    <div class="panel" ref="hover" v-draggable="draggableOptions">
+    <div class="panel hover" ref="hover" v-draggable="draggableOptions">
       <CounterComponent @open="isOpen?close():open()"></CounterComponent>
     </div>
   </div>
@@ -34,11 +34,15 @@ export default class RootComponent extends Vue {
   draggableOptions = {
     top: 24,
     left: 24,
-    marginX: 18,
-    marginY: 12,
+    marginX: 24,
+    marginY: 24,
     key: 'hover',
     moveCallback: () => this.move()
   };
+  
+  created() {
+    addEventListener('resize', () => this.move());
+  }
   
   open() {
     this.isOpen = true;
@@ -48,46 +52,34 @@ export default class RootComponent extends Vue {
     this.isOpen = false;
   }
   move() {
+    
     const hover: HTMLElement = this.$refs.hover as HTMLElement;
     const container: HTMLElement = this.$refs.container as HTMLElement;
 
     const hoverX = hover.offsetLeft + hover.offsetWidth / 2;
-    const hoverY = hover.offsetTop + hover.offsetHeight / 2;
-
     const windowWidth = document.documentElement.clientWidth;
-    const windowHeight = document.documentElement.clientHeight;
-
     const centerX = windowWidth / 2;
-    const centerY = windowHeight / 2;
-
-    const marginX = this.draggableOptions.marginX;
-    const marginY = this.draggableOptions.marginY;
     
-    // Magic numbers
-    const dX = 22, dY = 34, threshold = 300;
+    // Magic number
+    const threshold = 800;
+    const marginX = 12;
+    const dX = 34;
 
-    container.style.top = 'unset';
-    container.style.bottom = 'unset';
     container.style.left = 'unset';
     container.style.right = 'unset';
 
-    let targetX, targetY;
-    if (hoverX < centerX) {
-      targetX = (hoverX < threshold) ? marginX : (hoverX - dX);
-      container.style.left = `${targetX}px`;
+    if (windowWidth < threshold) {
+      container.style.left = `${marginX}px`;
+      container.style.right = `${marginX}px`;
     } else {
-      targetX = (windowWidth - hoverX < threshold) ? marginX : (windowWidth - (hoverX + dX));
-      container.style.right = `${targetX}px`;
+      if (hoverX < centerX) {
+        const left = hoverX + dX;
+        container.style.left = `${left}px`;
+      } else {
+        const right = windowWidth - (hoverX - dX);
+        container.style.right = `${right}px`;
+      }
     }
-    if (hoverY < centerY) {
-      targetY = hoverY + dY;
-      container.style.top = `${targetY}px`;
-    } else {
-      targetY = windowHeight - (hoverY - dY);
-      container.style.bottom = `${targetY}px`;
-    }
-    container.style.maxWidth = `${windowWidth - targetX - marginX}px`;
-    container.style.maxHeight = `${windowHeight - targetY - marginY}px`;
   }
 }
 </script>
@@ -113,6 +105,11 @@ export default class RootComponent extends Vue {
   box-shadow: 1px 1px 4px 0 #00000066;
 }
 .root-container {
-  height: 100%;
+  top: 12px;
+  height: calc(100vh - 24px);
+  max-width: calc(100vw - 24px);
+}
+.hover {
+  cursor: move;
 }
 </style>

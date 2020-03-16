@@ -17,6 +17,8 @@ const draggable: DirectiveOptions = {
       el.style.left = binding.value.left + 'px';
       el.style.top = binding.value.top + 'px';
     }
+    
+    // Add Resize Event Listener
     addEventListener('resize', () => {
       const top = Number(el.style.top .substr(0, el.style.top.length - 2));
       const left = Number(el.style.left.substr(0, el.style.left.length - 2));
@@ -24,51 +26,59 @@ const draggable: DirectiveOptions = {
       el.style.left = limit(left, marginX, document.documentElement.clientWidth - el.offsetWidth - marginX) + 'px';
     });
 
-    // PC
+    // On PC
     el.onmousedown = e => {
       e.preventDefault();
       //计算鼠标相对元素的位置
-      let disX = e.clientX - el.offsetLeft;
-      let disY = e.clientY - el.offsetTop;
-      document.onmousemove = e => {
-        // move callback
+      const disX = e.clientX - el.offsetLeft;
+      const disY = e.clientY - el.offsetTop;
+      const cursor = el.style.cursor;
+      el.style.cursor = 'move';
+      function onmousemove(e: MouseEvent) {
+        // callback
         binding.value.moveCallback();
-        el.style.cursor='move';
         //用鼠标的位置减去鼠标相对元素的位置，得到元素的位置2
-        let top = e.clientY - disY;
-        let left = e.clientX - disX;
+        const top = e.clientY - disY;
+        const left = e.clientX - disX;
         //移动当前元素
         moveTo(top, left);
-      };
-      document.onmouseup = moveFinish;
+      }
+      function onmouseup() {
+        el.style.cursor = cursor;
+        document.removeEventListener('mousemove', onmousemove);
+        document.removeEventListener('mouseup', onmouseup);
+        savePosition();
+      }
+      document.addEventListener('mousemove',  onmousemove, {passive: false});
+      document.addEventListener('mouseup',  onmouseup);
     };
 
-    // Mobile
+    // On Mobile
     el.ontouchstart = e => {
       //计算第一个触摸点相对元素的位置
       let disX = e.touches[0].clientX - el.offsetLeft;
       let disY = e.touches[0].clientY - el.offsetTop;
-      document.ontouchmove = e => {
+      function ontouchmove(e: TouchEvent) {
         e.preventDefault();
-        // move callback
+        // callback
         binding.value.moveCallback();
-        el.style.cursor='move';
         //用触摸点的位置减去触摸点相对元素的位置，得到元素的位置2
         let top = e.touches[0].clientY - disY;
         let left = e.touches[0].clientX - disX;
         //移动当前元素
         moveTo(top, left);
-      };
-      document.ontouchend = moveFinish;
+      }
+      function ontouchend() {
+        document.removeEventListener('touchmove', ontouchmove);
+        document.removeEventListener('touchend', ontouchend);
+        savePosition();
+      }
+      document.addEventListener('touchmove',  ontouchmove, {passive: false});
+      document.addEventListener('touchend',  ontouchend);
     };
     
     // Utils
-    function moveFinish() {
-      el.style.cursor='unset';
-      document.onmousemove = null;
-      document.onmouseup = null;
-      document.ontouchmove = null;
-      document.ontouchend = null;
+    function savePosition() {
       localStorage.setItem(`draggable@${binding.value.key}`, JSON.stringify({
         top: el.style.top,
         left: el.style.left,
