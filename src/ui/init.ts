@@ -1,4 +1,3 @@
-import * as $ from 'jquery';
 import Vue from 'vue';
 import {CreateElement} from 'vue/types/vue';
 
@@ -9,10 +8,20 @@ import RootComponent from './root-component.vue';
 export default function init() {
 
   // Create root element
-  const rootId = 'hook-ui-root';
-  $('body').prepend(`<div id="${rootId}"></div>`);
-  new Vue({ render: (h: CreateElement) => h(RootComponent) }).$mount(`#${rootId}`);
+  const host = document.createElement('div');
+
+  const body = document.querySelector('body');
+  if (body) {
+    body.append(host);
+  } else {
+    document.documentElement.append(host);
+  }
+
+  // Mount vue component
+  const vue = new Vue({ render: (h: CreateElement) => h(RootComponent) }).$mount(host);
 
   // Log
   log('UI', 'INIT');
+  
+  return vue;
 }

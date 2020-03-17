@@ -4,7 +4,7 @@
            @keyup.enter="location.href=proxiedUrl"
            @mousedown="$event.stopPropagation()"/>
     <a :href="proxiedUrl" target="_self"><RoundButton>Go</RoundButton></a>
-    <RoundButton @click="location.href=url">To</RoundButton>
+    <a :href="url" target="_self"><RoundButton>To</RoundButton></a>
   </div>
 </template>
 

@@ -6,6 +6,7 @@ export class DomHook {
 
   private readonly resourceService: ResourceService;
   private readonly href: string;
+  private bypassElements: Element[] = [];
 
   // ----- Init ----- //
   constructor(resourceService: ResourceService, href: string) {
@@ -44,11 +45,17 @@ export class DomHook {
     if (!attribute) {
       throw new Error(`Attribute name is null.`);
     }
+    if (this.isBypassElement(node)) {
+      return;
+    }
     this.detectResource(node);
     this.proxyNode(node, attribute);
   }
   private childNodeHandler(node: Node) {
     if (!(node instanceof HTMLElement && node.tagName)) {
+      return;
+    }
+    if (this.isBypassElement(node)) {
       return;
     }
     this.detectResource(node);
@@ -61,16 +68,6 @@ export class DomHook {
         this.proxyNode(node, 'action'); break;
     }
     node.childNodes.forEach(node => this.childNodeHandler(node));
-  }
-
-  // ----- Utils Functions ----- //
-  private proxyNode(node: HTMLElement, attribute: string) {
-    const url = (node as any)[attribute];
-    if (!isProxied(url)) {
-      const proxied = proxy(url);
-      debug('DOM_HOOK', `${node.tagName}.${attribute}\n-> ${url}\n<- ${proxied}`, node);
-      (node as any)[attribute] = proxied;
-    }
   }
 
   // ----- Resource Detectors ----- //
@@ -122,12 +119,33 @@ export class DomHook {
         }
       }
     }
-    
+
     if (description) {
       description = description.trim();
     }
 
     // Send to resource service
     this.resourceService.add({ type: 'image', url, description, source: this.href });
+  }
+
+  // ----- Utils Functions ----- //
+  private proxyNode(node: HTMLElement, attribute: string) {
+    const url = (node as any)[attribute];
+    if (!isProxied(url)) {
+      const proxied = proxy(url);
+      debug('DOM_HOOK', `${node.tagName}.${attribute}\n-> ${url}\n<- ${proxied}`, node);
+      (node as any)[attribute] = proxied;
+    }
+  }
+  
+  // ----- Bypass Elements ----- //
+  private isBypassElement(node: Element) {
+    return !this.bypassElements.every(n => !n.contains(node));
+  }
+  public addBypassElement(node: Element) {
+    return this.bypassElements.push(node);
+  }
+  public removeBypassElement(node: Element) {
+    return this.bypassElements.splice(this.bypassElements.indexOf(node), 1);
   }
 }

@@ -21,7 +21,10 @@ import {ServiceWorkerHook} from './hook/sw-hook';
   window.apiHook = new ApiHook(href);
   window.swHook = new ServiceWorkerHook(resourceService, href);
 
-  $(initUI);
+  $(() => {
+    const vue = initUI();
+    window.domHook?.addBypassElement(vue.$el);
+  });
 })();
 
 declare var ORIGIN: string;

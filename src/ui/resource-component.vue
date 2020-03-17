@@ -5,13 +5,13 @@
   >
     <div class="resource-entity">
       <img v-if="resource.type==='image'"
-           :src="resource.url" alt=""
+           :src="proxiedUrl" alt=""
            @load="onloadImage($event)"
            @error="onerror('img')"
            @abort="onerror('img')"
       />
       <video v-else-if="resource.type==='video'"
-             :src="resource.url"
+             :src="proxiedUrl"
              preload="metadata"
              @loadedmetadata="onloadVideo($event)"
              @error="onerror('video')"
@@ -20,7 +20,7 @@
       <div v-else-if="resource.type==='audio'">Audio</div>
     </div>
     <div class="resource-title" v-if="title">{{title}}</div>
-    <div class="resource-description" v-if="description">{{description}}</div>
+    <div class="resource-description" v-if="resource.description">{{resource.description}}</div>
     <div class="resource-selector">
       <div class="resource-selector-dot" v-if="resource.selected"></div>
     </div>
@@ -28,9 +28,10 @@
 </template>
 
 <script lang="ts">
-import {Component, Inject, Prop, Vue, Watch} from 'vue-property-decorator';
+import {Component, Inject, Prop, Vue} from 'vue-property-decorator';
 import {Resource, ResourceService} from '../utils/resource-service';
 import {debug} from '../utils/log-utils';
+import {proxy} from '../utils/url-utils';
 
 @Component
 export default class CounterComponent extends Vue {
@@ -39,9 +40,9 @@ export default class CounterComponent extends Vue {
   @Inject() resourceService!: ResourceService;
   
   title: string = 'loading...';
-  
-  get description() {
-    return this.resource.description;
+
+  get proxiedUrl() {
+    return proxy(this.resource.url);
   };
 
   click() {
@@ -87,10 +88,14 @@ export default class CounterComponent extends Vue {
 }
 
 .resource-entity {
+  position: relative;
   width: 100%;
   height: 100%;
 }
 .resource-entity > * {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
