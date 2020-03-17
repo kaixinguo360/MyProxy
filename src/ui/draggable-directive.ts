@@ -4,15 +4,15 @@ const draggable: DirectiveOptions = {
   bind:  (el, binding) => {
 
     // Init
-    const marginX = binding.value.marginX;
-    const marginY = binding.value.marginY;
+    const marginX = binding.value.marginX || 0;
+    const marginY = binding.value.marginY || 0;
     const configStr = localStorage.getItem(`draggable@${binding.value.key}`);
     if (configStr) {
       const config = JSON.parse(configStr);
       const top = Number(config.top.substr(0, config.top.length - 2));
       const left = Number(config.left.substr(0, config.left.length - 2));
-      el.style.top = limit(top, marginY, document.documentElement.clientHeight - el.offsetHeight - marginY) + 'px';
-      el.style.left = limit(left, marginX, document.documentElement.clientWidth - el.offsetWidth - marginX) + 'px';
+      el.style.top = limit(top, marginY, window.innerHeight - el.offsetHeight - marginY) + 'px';
+      el.style.left = limit(left, marginX, window.innerWidth - el.offsetWidth - marginX) + 'px';
     } else if (binding.value) {
       el.style.left = binding.value.left + 'px';
       el.style.top = binding.value.top + 'px';
@@ -22,8 +22,8 @@ const draggable: DirectiveOptions = {
     addEventListener('resize', () => {
       const top = Number(el.style.top .substr(0, el.style.top.length - 2));
       const left = Number(el.style.left.substr(0, el.style.left.length - 2));
-      el.style.top = limit(top, marginY, document.documentElement.clientHeight - el.offsetHeight - marginY) + 'px';
-      el.style.left = limit(left, marginX, document.documentElement.clientWidth - el.offsetWidth - marginX) + 'px';
+      el.style.top = limit(top, marginY, window.innerHeight - el.offsetHeight - marginY) + 'px';
+      el.style.left = limit(left, marginX, window.innerWidth - el.offsetWidth - marginX) + 'px';
     });
 
     // On PC
@@ -85,8 +85,8 @@ const draggable: DirectiveOptions = {
       }));
     }
     function moveTo(top: number, left: number) {
-      el.style.top = limit(top, marginY, document.documentElement.clientHeight - el.offsetHeight - marginY) + 'px';
-      el.style.left = limit(left, marginX, document.documentElement.clientWidth - el.offsetWidth - marginX) + 'px';
+      el.style.top = limit(top, marginY, window.innerHeight - el.offsetHeight - marginY) + 'px';
+      el.style.left = limit(left, marginX, window.innerWidth - el.offsetWidth - marginX) + 'px';
       el.style.right = 'unset';
       el.style.bottom = 'unset';
     }

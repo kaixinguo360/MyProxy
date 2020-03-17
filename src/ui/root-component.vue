@@ -34,39 +34,42 @@ export default class RootComponent extends Vue {
   draggableOptions = {
     top: 24,
     left: 24,
-    marginX: 24,
-    marginY: 24,
     key: 'hover',
-    moveCallback: () => this.move()
+    moveCallback: () => this.locate()
   };
   
   created() {
-    addEventListener('resize', () => this.move());
+    addEventListener('resize', () => this.locate());
   }
   
   open() {
     this.isOpen = true;
-    this.move();
+    this.locate();
   }
   close() {
     this.isOpen = false;
   }
-  move() {
+  locate() {
+    if (!this.isOpen) {
+      return;
+    }
     
     const hover: HTMLElement = this.$refs.hover as HTMLElement;
     const container: HTMLElement = this.$refs.container as HTMLElement;
 
     const hoverX = hover.offsetLeft + hover.offsetWidth / 2;
-    const windowWidth = document.documentElement.clientWidth;
+    const windowWidth = window.innerWidth;
     const centerX = windowWidth / 2;
     
     // Magic number
     const threshold = 800;
     const marginX = 12;
+    const marginY = 12;
     const dX = 34;
 
     container.style.left = 'unset';
     container.style.right = 'unset';
+    container.style.maxHeight = window.innerHeight - 2 * marginY + 'px';
 
     if (windowWidth < threshold) {
       container.style.left = `${marginX}px`;
@@ -107,7 +110,6 @@ export default class RootComponent extends Vue {
 .root-container {
   top: 12px;
   height: calc(100vh - 24px);
-  max-width: calc(100vw - 24px);
 }
 .hover {
   cursor: move;

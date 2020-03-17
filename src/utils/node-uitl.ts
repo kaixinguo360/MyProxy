@@ -102,12 +102,13 @@ export function saveResources(resources: Resource[]) {
 
 function checkUser() {
   if (!user) {
-    try {
-      user = JSON.parse(localStorage.getItem('user')!);
-    } catch (e) {
+    const userStr = localStorage.getItem('user');
+    if (userStr) {
+      user = JSON.parse(userStr);
+    } else {
       log('NODE_CONVERTER', 'Not logged in');
       alert('NODE_CONVERTER: Not logged in');
-      throw e;
+      throw new Error('Not logged in');
     }
   }
 }
