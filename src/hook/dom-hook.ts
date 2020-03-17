@@ -92,8 +92,14 @@ export class DomHook {
     let description = image.alt || image.title;
     function detectSiblings(cur: ChildNode) {
       while (cur.nextSibling) {
-        // log('Sibling===========')
         cur = cur.nextSibling;
+        
+        // filter script and style tag
+        const tagName = (cur as HTMLElement).tagName;
+        if (tagName === 'script' || tagName === 'style') {
+          continue;
+        }
+        
         if (cur.textContent) {
           description = cur.textContent;
           break;
@@ -106,12 +112,12 @@ export class DomHook {
     if (!description) {
       let cur: HTMLElement = node;
       while (!description) {
-        const parent = cur.parentElement;
-        if (parent && parent.childElementCount === 1) {
-          detectParent(parent);
-        } else {
-          detectSiblings(cur);
+        
+        detectSiblings(cur);
+        if (!description && cur.parentElement) {
+          detectParent(cur.parentElement);
         }
+        
         if (cur.parentElement) {
           cur = cur.parentElement;
         } else {
