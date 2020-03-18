@@ -5,13 +5,13 @@
   >
     <div class="resource-entity">
       <img v-if="resource.type==='image'"
-           :src="proxiedUrl" alt=""
+           :src="proxyUrl" alt=""
            @load="onloadImage($event)"
            @error="onerror('img')"
            @abort="onerror('img')"
       />
       <video v-else-if="resource.type==='video'"
-             :src="proxiedUrl"
+             :src="proxyUrl"
              preload="metadata"
              @loadedmetadata="onloadVideo($event)"
              @error="onerror('video')"
@@ -29,20 +29,24 @@
 
 <script lang="ts">
 import {Component, Inject, Prop, Vue} from 'vue-property-decorator';
-import {Resource, ResourceService} from '../utils/resource-service';
 import {debug} from '../utils/log-utils';
-import {proxy} from '../utils/url-utils';
+import {Resource, ResourceService} from '../utils/resource-service';
+import {ProxyService} from '../utils/proxy-service';
+
+import {ModifiedWindow} from '../main';
+declare var window: ModifiedWindow;
 
 @Component
 export default class CounterComponent extends Vue {
   
   @Prop() resource!: Resource;
   @Inject() resourceService!: ResourceService;
-  
+
+  proxyService: ProxyService = window.proxyService;
   title: string = 'loading...';
 
-  get proxiedUrl() {
-    return proxy(this.resource.url);
+  get proxyUrl() {
+    return this.proxyService.proxy(this.resource.url);
   };
 
   click() {

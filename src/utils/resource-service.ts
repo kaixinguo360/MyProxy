@@ -1,6 +1,6 @@
 import {debug} from './log-utils';
-import {direct} from './url-utils';
 import {savePage, saveResource, saveResources} from './node-uitl';
+import {ProxyService} from './proxy-service';
 
 export interface Resource {
   url: string;
@@ -15,15 +15,21 @@ export interface Resource {
 
 export class ResourceService {
 
+  private readonly proxyService: ProxyService;
+
   public readonly resources = new Map<string, Resource>();
   public size = 0;
   public selected = 0;
+  
+  constructor(proxyService: ProxyService) {
+    this.proxyService = proxyService;
+  }
 
   public add(resource: Resource) {
     if (resource.url.startsWith(location.origin)) {
       return;
     }
-    const key = direct(resource.url);
+    const key = this.proxyService.direct(resource.url);
     const old = this.resources.get(key);
     if (old) {
       if (resource.title && resource.title !== old.title) {

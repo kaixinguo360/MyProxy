@@ -1,22 +1,22 @@
 import ULocation from 'ulocation';
-import {absUrl, proxy} from '../utils/url-utils';
 import {log} from '../utils/log-utils';
+import {ProxyService} from '../utils/proxy-service';
 
 export class ApiHook {
 
   // ----- Init ----- //
-  constructor(href: string) {
+  constructor(proxyService: ProxyService, href: string) {
     const urlObj = new URL(href);
     const __location = this.createFakeLocation(href);
 
     // history
     this.fakeFunction(history, 'replaceState', (raw, data, title, url) => {
-      __location.href = absUrl(url);
-      raw.call(history, data, title, proxy(url));
+      __location.href = proxyService.absolute(url);
+      raw.call(history, data, title, proxyService.proxy(url, true));
     });
     this.fakeFunction(history, 'pushState', (raw, data, title, url) => {
-      __location.href = absUrl(url);
-      raw.call(history, data, title, proxy(url));
+      __location.href = proxyService.absolute(url);
+      raw.call(history, data, title, proxyService.proxy(url, true));
     });
 
     // document
@@ -24,7 +24,7 @@ export class ApiHook {
     this.fakeProperty(document, 'URL', urlObj.href);
 
     // window
-    this.fakeFunction(window, 'open', (raw, url, ...args) => raw(proxy(url), ...args));
+    this.fakeFunction(window, 'open', (raw, url, ...args) => raw(proxyService.proxy(url, true), ...args));
     
     // Log
     log('API_HOOK', 'INIT');

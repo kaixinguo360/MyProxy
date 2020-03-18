@@ -1,16 +1,23 @@
-import {direct, isProxied, proxy} from '../utils/url-utils';
 import {debug, log} from '../utils/log-utils';
 import {ResourceService} from '../utils/resource-service';
+import {ProxyService} from '../utils/proxy-service';
 
 export class DomHook {
 
   private readonly resourceService: ResourceService;
+  private readonly proxyService: ProxyService;
   private readonly href: string;
+
   private bypassElements: Element[] = [];
 
   // ----- Init ----- //
-  constructor(resourceService: ResourceService, href: string) {
+  constructor(
+    resourceService: ResourceService,
+    proxyService: ProxyService,
+    href: string,
+  ) {
     this.resourceService = resourceService;
+    this.proxyService = proxyService;
     this.href = href;
 
     // Add Mutation Observer
@@ -48,8 +55,7 @@ export class DomHook {
     if (this.isBypassElement(node)) {
       return;
     }
-    this.detectResource(node);
-    this.proxyNode(node, attribute);
+    this.process(node);
   }
   private childNodeHandler(node: Node) {
     if (!(node instanceof HTMLElement && node.tagName)) {
@@ -58,16 +64,19 @@ export class DomHook {
     if (this.isBypassElement(node)) {
       return;
     }
+    this.process(node);
+    node.childNodes.forEach(node => this.childNodeHandler(node));
+  }
+  private process(node: HTMLElement) {
     this.detectResource(node);
     switch (node.tagName) {
       case 'IMG':
         this.proxyNode(node, 'src'); break;
       case 'A':
-        this.proxyNode(node, 'href'); break;
+        this.proxyNode(node, 'href', true); break;
       case 'FORM':
-        this.proxyNode(node, 'action'); break;
+        this.proxyNode(node, 'action', true); break;
     }
-    node.childNodes.forEach(node => this.childNodeHandler(node));
   }
 
   // ----- Resource Detectors ----- //
@@ -83,7 +92,7 @@ export class DomHook {
 
     // Detect basic info of image
     const image = node;
-    const url = direct(image.src);
+    const url = this.proxyService.direct(image.src);
     if (!url || url === this.href) {
       return;
     }
@@ -93,13 +102,13 @@ export class DomHook {
     function detectSiblings(cur: ChildNode) {
       while (cur.nextSibling) {
         cur = cur.nextSibling;
-        
+
         // filter script and style tag
         const tagName = (cur as HTMLElement).tagName;
         if (tagName === 'script' || tagName === 'style') {
           continue;
         }
-        
+
         if (cur.textContent) {
           description = cur.textContent;
           break;
@@ -112,12 +121,12 @@ export class DomHook {
     if (!description) {
       let cur: HTMLElement = node;
       while (!description) {
-        
+
         detectSiblings(cur);
         if (!description && cur.parentElement) {
           detectParent(cur.parentElement);
         }
-        
+
         if (cur.parentElement) {
           cur = cur.parentElement;
         } else {
@@ -135,15 +144,15 @@ export class DomHook {
   }
 
   // ----- Utils Functions ----- //
-  private proxyNode(node: HTMLElement, attribute: string) {
+  private proxyNode(node: HTMLElement, attribute: string, force = false) {
     const url = (node as any)[attribute];
-    if (!isProxied(url)) {
-      const proxied = proxy(url);
-      debug('DOM_HOOK', `${node.tagName}.${attribute}\n-> ${url}\n<- ${proxied}`, node);
-      (node as any)[attribute] = proxied;
+    const proxyUrl = this.proxyService.proxy(url, force);
+    if (proxyUrl !== url) {
+      debug('DOM_HOOK', `${node.tagName}.${attribute}\n-> ${url}\n<- ${proxyUrl}`, node);
+      (node as any)[attribute] = proxyUrl;
     }
   }
-  
+
   // ----- Bypass Elements ----- //
   private isBypassElement(node: Element) {
     return !this.bypassElements.every(n => !n.contains(node));

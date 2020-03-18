@@ -1,12 +1,16 @@
 /// <reference lib="WebWorker" />
-import {absUrl, decodeUrl, proxy} from './utils/url-utils';
+import {decodeUrl, ProxyService} from './utils/proxy-service';
 
 declare var self: ServiceWorkerGlobalScope;
 
+// ----- Proxy Service ----- //
+const proxyService = new ProxyService();
+
+// ----- Event Listener ----- //
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('fetch', e => e.respondWith(handleFetch(e)));
 
-// ----- Handlers ----- //
+// ----- Fetch Handlers ----- //
 function handleFetch(event: FetchEvent) {
   const request = event.request;
 
@@ -42,7 +46,7 @@ function handleFetch_SamePath(event: FetchEvent) {
     url = decodeUrl(encodeUrl);
   } catch (e) {
     return getClientBase(event.clientId).then(base => {
-      const urlStr = absUrl(encodeUrl, base);
+      const urlStr = proxyService.absolute(encodeUrl, base);
       return handleRequest(event, urlStr);
     });
   }
@@ -61,11 +65,11 @@ function handleFetch_SameOrigin(event: FetchEvent) {
   });
 }
 
-// ----- Response ----- //
+// ----- Request & Response ----- //
 function handleRequest(event: FetchEvent, url: string) {
   const request = event.request;
   const base = new URL(url);
-  const proxyUrl = proxy(url, base);
+  const proxyUrl = proxyService.proxy(url, false, base);
   const req = new Request(proxyUrl, request);
 
   postMessage(event.clientId, 'request', {
@@ -112,7 +116,7 @@ function handleResponse(event: FetchEvent, response: Response, base: URL) {
       return response.text().then(text => {
         text = text.replace(
           /url\s*\(\s*([^\s]*)\s*\)/g,
-          (...str) => `url(${absUrl(str[1], base)})`
+          (...str) => `url(${proxyService.absolute(str[1], base)})`
         );
         return makeRes(text, 200, response.headers);
       });

@@ -1,18 +1,20 @@
 <template>
   <div class="search-box">
     <input class="search-input" v-model="url"
-           @keyup.enter="location.href=proxiedUrl"
+           @keyup.enter="location.href=proxyUrl"
            @mousedown="$event.stopPropagation()"/>
-    <a :href="proxiedUrl" target="_self"><RoundButton>Go</RoundButton></a>
+    <a :href="proxyUrl" target="_self"><RoundButton>Go</RoundButton></a>
     <a :href="url" target="_self"><RoundButton>To</RoundButton></a>
+    <RoundButton @click="toggleProxy()">{{optional?'Off':'On'}}</RoundButton>
   </div>
 </template>
 
 <script lang="ts">
 import {Component, Vue} from 'vue-property-decorator';
-import {proxy} from '../utils/url-utils';
-import {ModifiedWindow} from '../main';
 import RoundButton from './round-button-component.vue';
+
+import {ModifiedWindow} from '../main';
+import {ProxyService} from '../utils/proxy-service';
 declare var window: ModifiedWindow;
 
 @Component({
@@ -20,11 +22,19 @@ declare var window: ModifiedWindow;
 })
 export default class SearchComponent extends Vue {
   
-  url = window.__location?.href;
+  url = window.__location.href;
   location = window.location;
+  proxyService: ProxyService = window.proxyService;
   
-  get proxiedUrl() {
-    return proxy(this.url!);
+  get proxyUrl() {
+    return this.proxyService.proxy(this.url, true);
+  }
+  get optional() {
+    return this.proxyService.optional;
+  }
+
+  toggleProxy() {
+    ProxyService.setOptional(!this.proxyService.optional);
   }
 }
 </script>

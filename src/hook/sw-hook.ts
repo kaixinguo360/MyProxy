@@ -1,20 +1,26 @@
 import {debug, log} from '../utils/log-utils';
 import {ResourceService} from '../utils/resource-service';
-import {direct} from '../utils/url-utils';
+import {ProxyService} from '../utils/proxy-service';
 
 export class ServiceWorkerHook {
 
   private readonly resourceService: ResourceService;
+  private readonly proxyService: ProxyService;
   private readonly href: string;
 
   // ----- Init ----- //
-  constructor(resourceService: ResourceService, href: string) {
+  constructor(
+    resourceService: ResourceService,
+    proxyService: ProxyService,
+    href: string,
+  ) {
     if (!('serviceWorker' in navigator)) {
       log('SW_HOOK', 'UNSUPPORTED');
       throw new Error('[UNSUPPORTED] -> Service Worker');
     }
 
     this.resourceService = resourceService;
+    this.proxyService = proxyService;
     this.href = href;
     
     this.installServiceWorker();
@@ -48,7 +54,7 @@ export class ServiceWorkerHook {
   // ----- Utils Functions ----- //
   private handleRequest(request: {url: string, destination: string}) {
     debug('SW_HOOK', 'REQUEST', request.url, request);
-    const url = direct(request.url);
+    const url = this.proxyService.direct(request.url);
     switch (request.destination) {
       case "image":
         return this.resourceService.add({type: 'image', url, source: this.href});
