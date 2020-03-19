@@ -46,7 +46,7 @@ export default class CounterComponent extends Vue {
   title: string = 'loading...';
 
   get proxyUrl() {
-    return this.proxyService.proxy(this.resource.url);
+    return this.proxyService.proxy(this.resource.url, this.resource.type);
   };
 
   click() {

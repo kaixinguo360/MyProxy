@@ -71,11 +71,11 @@ export class DomHook {
     this.detectResource(node);
     switch (node.tagName) {
       case 'IMG':
-        this.proxyNode(node, 'src'); break;
+        this.proxyNode(node, 'src', 'image'); break;
       case 'A':
-        this.proxyNode(node, 'href', true); break;
+        this.proxyNode(node, 'href', 'document'); break;
       case 'FORM':
-        this.proxyNode(node, 'action', true); break;
+        this.proxyNode(node, 'action', 'document'); break;
     }
   }
 
@@ -144,9 +144,9 @@ export class DomHook {
   }
 
   // ----- Utils Functions ----- //
-  private proxyNode(node: HTMLElement, attribute: string, force = false) {
+  private proxyNode(node: HTMLElement, attribute: string, type?: string) {
     const url = (node as any)[attribute];
-    const proxyUrl = this.proxyService.proxy(url, force);
+    const proxyUrl = this.proxyService.proxy(url, type);
     if (proxyUrl !== url) {
       debug('DOM_HOOK', `${node.tagName}.${attribute}\n-> ${url}\n<- ${proxyUrl}`, node);
       (node as any)[attribute] = proxyUrl;

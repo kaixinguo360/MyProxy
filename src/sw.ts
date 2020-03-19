@@ -69,8 +69,8 @@ function handleFetch_SameOrigin(event: FetchEvent) {
 function handleRequest(event: FetchEvent, url: string) {
   const request = event.request;
   const base = new URL(url);
-  const proxyUrl = proxyService.proxy(url, false, base);
-  const req = new Request(proxyUrl, request);
+  const proxyUrl = proxyService.proxy(url, request.destination, base);
+  const req = (proxyUrl !== url) ? new Request(proxyUrl, request) : request;
 
   postMessage(event.clientId, 'request', {
     destination: request.destination, url

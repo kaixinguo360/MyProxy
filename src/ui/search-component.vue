@@ -5,7 +5,6 @@
            @mousedown="$event.stopPropagation()"/>
     <a :href="proxyUrl" target="_self"><RoundButton>Go</RoundButton></a>
     <a :href="url" target="_self"><RoundButton>To</RoundButton></a>
-    <RoundButton @click="toggleProxy()">{{optional?'Off':'On'}}</RoundButton>
   </div>
 </template>
 
@@ -27,14 +26,7 @@ export default class SearchComponent extends Vue {
   proxyService: ProxyService = window.proxyService;
   
   get proxyUrl() {
-    return this.proxyService.proxy(this.url, true);
-  }
-  get optional() {
-    return this.proxyService.optional;
-  }
-
-  toggleProxy() {
-    ProxyService.setOptional(!this.proxyService.optional);
+    return this.proxyService.proxy(this.url);
   }
 }
 </script>

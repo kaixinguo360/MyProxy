@@ -12,11 +12,11 @@ export class ApiHook {
     // history
     this.fakeFunction(history, 'replaceState', (raw, data, title, url) => {
       __location.href = proxyService.absolute(url);
-      raw.call(history, data, title, proxyService.proxy(url, true));
+      raw.call(history, data, title, proxyService.proxy(url));
     });
     this.fakeFunction(history, 'pushState', (raw, data, title, url) => {
       __location.href = proxyService.absolute(url);
-      raw.call(history, data, title, proxyService.proxy(url, true));
+      raw.call(history, data, title, proxyService.proxy(url));
     });
 
     // document
@@ -24,7 +24,7 @@ export class ApiHook {
     this.fakeProperty(document, 'URL', urlObj.href);
 
     // window
-    this.fakeFunction(window, 'open', (raw, url, ...args) => raw(proxyService.proxy(url, true), ...args));
+    this.fakeFunction(window, 'open', (raw, url, ...args) => raw(proxyService.proxy(url), ...args));
     
     // Log
     log('API_HOOK', 'INIT');

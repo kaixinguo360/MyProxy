@@ -10,24 +10,28 @@ export function decodeUrl(url: string) {
   return atob(url.replace(/-/g, '+').replace(/_/g, '/'));
 }
 
+export function isSpecialUrl(url: string) {
+  return url === null
+    || url === undefined
+    || url.startsWith('javascript:')
+    || url.startsWith('data:');
+}
 export function isAbsoluteUrl(url: string) {
-  return (url.startsWith('http://') || url.startsWith('https://'));
+  return isSpecialUrl(url) || url.startsWith('http://') || url.startsWith('https://');
 }
 export function isProxyUrl(url: string) {
-  return url.startsWith(location.origin + '/proxy/');
+  return isSpecialUrl(url) || url.startsWith(location.origin + '/proxy/');
 }
 export function isDirectUrl(url: string) {
-  return isAbsoluteUrl(url) && !url.startsWith(location.origin);
+  return isSpecialUrl(url) || (isAbsoluteUrl(url) && !url.startsWith(location.origin));
 }
 
 export function absoluteUrl(url: string, base: URL) {
+  if (isAbsoluteUrl(url)) { return url; }
+  
   const origin = base.origin;
   const path = base.href.substr(base.origin.length);
-  if (url === null || url === undefined) {
-    return url;
-  } else  if (url.startsWith('http://') || url.startsWith('https://')) {
-    return url;
-  } else if (url.startsWith('//')) {
+  if (url.startsWith('//')) {
     return location.protocol + url;
   } else if (url.startsWith('/')) {
     return origin + url;
@@ -38,8 +42,9 @@ export function absoluteUrl(url: string, base: URL) {
   }
 }
 export function proxyUrl(url: string, base: URL) {
+  if (isProxyUrl(url)) { return url; }
+  
   const urlStr = absoluteUrl(url, base);
-
   if (urlStr.startsWith(location.origin + '/proxy/')) {
     return urlStr;
   } else if (urlStr.startsWith(location.origin)) {
@@ -51,8 +56,9 @@ export function proxyUrl(url: string, base: URL) {
   }
 }
 export function directUrl(url: string, base: URL) {
+  if (isDirectUrl(url)) { return url; }
+  
   const urlStr = absoluteUrl(url, base);
-
   if (urlStr.startsWith(location.origin + '/proxy/')) {
     if (urlStr.startsWith(location.origin + '/proxy/static/')) {
       const encodeUrl = urlStr.substr((location.origin + '/proxy/static/').length);
@@ -74,42 +80,58 @@ export function directUrl(url: string, base: URL) {
 
 export class ProxyService {
 
-  private static broadcastChannel= new BroadcastChannel('proxyService@setOptional');
-  public static setOptional(optional: boolean) {
-    ProxyService.broadcastChannel.postMessage(optional);
-    if (optional) {
-      localStorage.setItem('proxyService@optional', 'true');
-    } else {
-      localStorage.removeItem('proxyService@optional');
-    }
+  private static defaultStrategy = {};
+  private static broadcastChannel= new BroadcastChannel('proxyService@strategy');
+  public static setStrategy(strategy: ProxyStrategy) {
+    ProxyService.defaultStrategy = strategy;
+    ProxyService.broadcastChannel.postMessage(strategy);
+    localStorage.setItem('proxyService@strategy', JSON.stringify(strategy));
   }
   public static init() {
-    const optional = !!localStorage.getItem('proxyService@optional');
-    ProxyService.setOptional(optional);
+    const str = localStorage.getItem('proxyService@strategy');
+    const strategy = str ? JSON.parse(str) : {};
+    ProxyService.setStrategy(strategy);
   }
 
   public base!: URL;
-  public optional!: boolean;
+  public strategy!: ProxyStrategy;
   
-  constructor(baseUrl?: string, optional = false) {
+  constructor(baseUrl?: string, strategy?: ProxyStrategy) {
     if (baseUrl) {
       this.base = new URL(baseUrl);
     }
-    this.optional = optional;
+    if (strategy) {
+      this.strategy = strategy;
+    } else {
+      this.strategy = ProxyService.defaultStrategy;
+    }
 
-    const broadcastChannel= new BroadcastChannel('proxyService@setOptional');
+    const broadcastChannel= new BroadcastChannel('proxyService@strategy');
     broadcastChannel.addEventListener('message', event => {
-      this.optional = event.data;
+      this.strategy = event.data;
     });
   }
 
   public absolute(url: string, base?: URL) {
     return absoluteUrl(url, base || this.base);
   }
-  public proxy(url: string, force = false, base?: URL) {
-    return (force || !this.optional) ? proxyUrl(url, base || this.base) : this.absolute(url, base || this.base);
+  public proxy(url: string, type?: string, base?: URL) {
+    let isProxy = true;
+    if (type) {
+      if (type in this.strategy) {
+        isProxy = this.strategy[type];
+      } else if ('default' in this.strategy) {
+        isProxy = this.strategy['default'];
+      }
+    }
+    return isProxy ? proxyUrl(url, base || this.base) : this.direct(url, base || this.base);
   }
   public direct(url: string, base?: URL) {
     return directUrl(url, base || this.base);
   }
+}
+
+// ----- Proxy Strategy ----- //
+export interface ProxyStrategy {
+  [type: string]: boolean;
 }

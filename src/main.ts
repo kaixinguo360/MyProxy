@@ -16,7 +16,9 @@ import {ProxyService} from './utils/proxy-service';
   const href = ORIGIN + PATH;
   log('INIT', href);
 
-  const proxyService = new ProxyService(href, false);
+  ProxyService.init();
+
+  const proxyService = new ProxyService(href);
   const resourceService = new ResourceService(proxyService);
   window.proxyService = proxyService;
   window.resourceService = resourceService;
@@ -24,8 +26,6 @@ import {ProxyService} from './utils/proxy-service';
   window.domHook = new DomHook(resourceService, proxyService, href);
   window.apiHook = new ApiHook(proxyService, href);
   window.swHook = new ServiceWorkerHook(resourceService, proxyService, href);
-  
-  ProxyService.init();
 
   $(() => {
     const vue = initUI();
