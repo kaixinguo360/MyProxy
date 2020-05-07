@@ -7,7 +7,7 @@
 
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
-import {ResourceService} from '../utils/resource-service';
+import {ResourceService} from '../services/resource-service';
 import SearchComponent from './search-component.vue';
 import ResourcesComponent from './resources-component.vue';
 import RoundButton from './round-button-component.vue';

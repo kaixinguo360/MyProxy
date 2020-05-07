@@ -16,7 +16,7 @@
 
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
-import {Resource, ResourceService} from '../utils/resource-service';
+import {Resource, ResourceService} from '../services/resource-service';
 import ResourceComponent from './resource-component.vue';
 import RoundButton from './round-button-component.vue';
 

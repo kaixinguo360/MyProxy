@@ -1,8 +1,8 @@
-import {Resource} from './resource-service';
+import {Resource} from '../services/resource-service';
 import {log} from './log-utils';
 declare var __location: Location;
 
-export class MainData {
+class MainData {
   id?: number;
   user?: number;
   type?: string;
@@ -20,33 +20,33 @@ export class MainData {
   description?: string;
   comment?: string;
 }
-export class ExtraData {
+class ExtraData {
   nodeType!: string;
 }
-export class ListItem<T extends ExtraData = ExtraData> {
+class ListItem<T extends ExtraData = ExtraData> {
   node?: Node<T>;
   status?: string;
 }
-export class Node<T extends ExtraData = ExtraData> {
+class Node<T extends ExtraData = ExtraData> {
   mainData!: MainData;
   extraData?: T;
   extraList?: ListItem[];
   tags?: Node[] | number[];
 }
 
-export class Image extends ExtraData {
+class Image extends ExtraData {
   url!: string;
   type?: string;
   author?: string;
   gallery?: string;
   source?: string;
 }
-export class Video extends ExtraData {
+class Video extends ExtraData {
   url!: string;
   format?: string = 'mp4';
 }
 
-export class User {
+class User {
   id?: number;
   name?: string;
   pass?: string;

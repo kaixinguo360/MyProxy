@@ -30,8 +30,8 @@
 <script lang="ts">
 import {Component, Inject, Prop, Vue} from 'vue-property-decorator';
 import {debug} from '../utils/log-utils';
-import {Resource, ResourceService} from '../utils/resource-service';
-import {ProxyService} from '../utils/proxy-service';
+import {Resource, ResourceService} from '../services/resource-service';
+import {ProxyService} from '../services/proxy-service';
 
 import {ModifiedWindow} from '../main';
 declare var window: ModifiedWindow;

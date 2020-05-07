@@ -13,7 +13,7 @@ import {Component, Vue} from 'vue-property-decorator';
 import RoundButton from './round-button-component.vue';
 
 import {ModifiedWindow} from '../main';
-import {ProxyService} from '../utils/proxy-service';
+import {ProxyService} from '../services/proxy-service';
 declare var window: ModifiedWindow;
 
 @Component({

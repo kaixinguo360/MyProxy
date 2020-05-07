@@ -1,8 +1,8 @@
-import {debug, log} from '../utils/log-utils';
-import {ResourceService} from '../utils/resource-service';
-import {ProxyService} from '../utils/proxy-service';
+import {debug, log} from '../../utils/log-utils';
+import {ResourceService} from '../resource-service';
+import {ProxyService} from '../proxy-service';
 
-export class ServiceWorkerHook {
+export class ServiceWorkerService {
 
   private readonly resourceService: ResourceService;
   private readonly proxyService: ProxyService;

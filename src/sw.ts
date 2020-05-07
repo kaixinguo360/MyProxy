@@ -1,5 +1,5 @@
 /// <reference lib="WebWorker" />
-import {decodeUrl, ProxyService} from './utils/proxy-service';
+import {decodeUrl, ProxyService} from './services/proxy-service';
 
 declare var self: ServiceWorkerGlobalScope;
 
