@@ -1,5 +1,5 @@
-import {debug} from './log-utils';
-import {savePage, saveResource, saveResources} from './node-uitl';
+import {debug} from '../utils/log-utils';
+import {savePage, saveResource, saveResources} from '../utils/node-utils';
 import {ProxyService} from './proxy-service';
 
 export interface Resource {

@@ -6,7 +6,7 @@
 
 <script lang="ts">
 import {Component, Inject, Vue} from 'vue-property-decorator';
-import {ResourceService} from '../utils/resource-service';
+import {ResourceService} from '../services/resource-service';
 import RoundButton from './round-button-component.vue';
 
 @Component({

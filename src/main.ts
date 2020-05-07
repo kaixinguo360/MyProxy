@@ -2,12 +2,12 @@ import * as $ from 'jquery';
 
 import initUI from './ui/init';
 import {log} from './utils/log-utils';
-import {ResourceService} from './utils/resource-service';
+import {ResourceService} from './services/resource-service';
 
 import {DomHook} from './hook/dom-hook';
 import {ApiHook} from './hook/api-hook';
 import {ServiceWorkerHook} from './hook/sw-hook';
-import {ProxyService} from './utils/proxy-service';
+import {ProxyService} from './services/proxy-service';
 
 (function init() {
   if (window.initialized) { return; }
