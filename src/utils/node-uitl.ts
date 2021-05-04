@@ -84,7 +84,7 @@ export function saveResources(resources: Resource[]) {
     mainData: {
       user: user.id,
       title: document.title,
-      type: 'list',
+      type: 'collection',
       collection: true,
       source: __location.href,
     },
