@@ -46,43 +46,28 @@ export class Video extends ExtraData {
   format?: string = 'mp4';
 }
 
-export class User {
-  id?: number;
-  name?: string;
-  pass?: string;
-  email?: string;
-  status?: string;
-}
-
-let user: User;
-
-export function savePage() {
-  checkUser();
+export function savePage(apiUrl?: string) {
   const draft: Node = {
     mainData: {
-      user: user.id,
       title: document.title,
       type: 'node',
       source: __location.href,
     },
   };
-  saveDraft(draft);
+  saveDraft(draft, apiUrl);
 }
-export function saveResource(resource: Resource) {
-  checkUser();
+export function saveResource(resource: Resource, apiUrl?: string) {
   const draft = toNode(resource);
   if (!supportedType(draft.mainData.type)) {
     alert(`Unsupported type: ${draft.mainData.type}`);
     return;
   }
   draft.mainData.title = document.title;
-  saveDraft(draft);
+  saveDraft(draft, apiUrl);
 }
-export function saveResources(resources: Resource[]) {
-  checkUser();
+export function saveResources(resources: Resource[], apiUrl?: string) {
   const draft: Node = {
     mainData: {
-      user: user.id,
       title: document.title,
       type: 'collection',
       collection: true,
@@ -97,21 +82,9 @@ export function saveResources(resources: Resource[]) {
       .filter(node => supportedType(node.mainData.type))
       .map(node => ({status: 'new', node: node}))
   };
-  saveDraft(draft);
+  saveDraft(draft, apiUrl);
 }
 
-function checkUser() {
-  if (!user) {
-    const userStr = localStorage.getItem('user');
-    if (userStr) {
-      user = JSON.parse(userStr);
-    } else {
-      log('NODE_CONVERTER', 'Not logged in');
-      alert('NODE_CONVERTER: Not logged in');
-      throw new Error('Not logged in');
-    }
-  }
-}
 function supportedType(type?: string) {
   if (!type) {
     return false;
@@ -122,7 +95,6 @@ function supportedType(type?: string) {
 function toNode(resource: Resource) {
   const draft: Node = {
     mainData: {
-      user: user.id,
       title: resource.title,
       type: getType(resource),
       source: resource.source,
@@ -147,8 +119,12 @@ function toNode(resource: Resource) {
 function getType(resource: Resource) {
   return (resource.type === 'audio') ? 'music' : resource.type;
 }
-function saveDraft(draft: Node) {
+function saveDraft(draft: Node, apiUrl?: string) {
   draft.tags = [];
-  localStorage.setItem('node-edit@draft', JSON.stringify(draft));
-  location.href = location.origin + '/node/new?draft=1';
+  if (apiUrl) {
+    location.href = apiUrl + '/save?draft=' + JSON.stringify(draft);
+  } else {
+    localStorage.setItem('node-edit@draft', JSON.stringify(draft));
+    location.href = location.origin + '/node/new?draft=1';
+  }
 }

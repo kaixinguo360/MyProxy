@@ -95,8 +95,10 @@ export class ProxyService {
 
   public base!: URL;
   public strategy!: ProxyStrategy;
+  public byPass: boolean;
   
-  constructor(baseUrl?: string, strategy?: ProxyStrategy) {
+  constructor(byPass = false, baseUrl?: string, strategy?: ProxyStrategy) {
+    this.byPass = byPass;
     if (baseUrl) {
       this.base = new URL(baseUrl);
     }
@@ -113,9 +115,11 @@ export class ProxyService {
   }
 
   public absolute(url: string, base?: URL) {
+    if (this.byPass) return url;
     return absoluteUrl(url, base || this.base);
   }
   public proxy(url: string, type?: string, base?: URL) {
+    if (this.byPass) return url;
     let isProxy = true;
     if (type) {
       if (type in this.strategy) {
@@ -127,6 +131,7 @@ export class ProxyService {
     return isProxy ? proxyUrl(url, base || this.base) : this.direct(url, base || this.base);
   }
   public direct(url: string, base?: URL) {
+    if (this.byPass) return url;
     return directUrl(url, base || this.base);
   }
 }

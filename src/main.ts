@@ -13,19 +13,29 @@ import {ProxyService} from './utils/proxy-service';
   if (window.initialized) { return; }
   window.initialized = true;
 
-  const href = ORIGIN + PATH;
+  const origin = typeof(ORIGIN) !== "undefined" ? ORIGIN : location.origin;
+  const path = typeof(PATH) !== "undefined" ? PATH : location.pathname;
+  const standalone = typeof(API) !== "undefined";
+  const api = standalone ? API : undefined;
+
+  const href = origin + path;
   log('INIT', href);
 
   ProxyService.init();
 
-  const proxyService = new ProxyService(href);
-  const resourceService = new ResourceService(proxyService);
+  const proxyService = new ProxyService(standalone, href);
+  const resourceService = new ResourceService(proxyService, api);
   window.proxyService = proxyService;
   window.resourceService = resourceService;
   
   window.domHook = new DomHook(resourceService, proxyService, href);
-  window.apiHook = new ApiHook(proxyService, href);
-  window.swHook = new ServiceWorkerHook(resourceService, proxyService, href);
+  if (!standalone) {
+    window.apiHook = new ApiHook(proxyService, href);
+    window.swHook = new ServiceWorkerHook(resourceService, proxyService, href);
+  } else {
+    (window as any).__location = location;
+    (document as any).__location = location;
+  }
 
   $(() => {
     const vue = initUI();
@@ -35,6 +45,7 @@ import {ProxyService} from './utils/proxy-service';
 
 declare var ORIGIN: string;
 declare var PATH: string;
+declare var API: string;
 declare var window: ModifiedWindow;
 
 export class ModifiedWindow extends Window {

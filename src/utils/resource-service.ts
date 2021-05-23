@@ -16,13 +16,15 @@ export interface Resource {
 export class ResourceService {
 
   private readonly proxyService: ProxyService;
+  private readonly apiUrl?: string;
 
   public readonly resources = new Map<string, Resource>();
   public size = 0;
   public selected = 0;
   
-  constructor(proxyService: ProxyService) {
+  constructor(proxyService: ProxyService, apiUrl?: string) {
     this.proxyService = proxyService;
+    this.apiUrl = apiUrl;
   }
 
   public add(resource: Resource) {
@@ -84,11 +86,11 @@ export class ResourceService {
   public save() {
     const selected = this.getAllSelected();
     if (selected.length === 0) {
-      savePage();
+      savePage(this.apiUrl);
     } else if (selected.length === 1) {
-      saveResource(selected[0]);
+      saveResource(selected[0], this.apiUrl);
     } else {
-      saveResources(selected);
+      saveResources(selected, this.apiUrl);
     }
   }
 }
