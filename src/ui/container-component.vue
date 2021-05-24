@@ -1,6 +1,6 @@
 <template>
-  <div class="container">
-    <SearchComponent class="search-container"></SearchComponent>
+  <div class="myui-container">
+    <SearchComponent class="myui-search-container"></SearchComponent>
     <ResourcesComponent></ResourcesComponent>
   </div>
 </template>
@@ -25,14 +25,14 @@ export default class ContainerComponent extends Vue {
 </script>
 
 <style scoped>
-.container {
+.myui-container {
   display: flex;
   flex-direction: column;
   align-items: stretch;
   padding: 8px;
   height: calc(100% - 16px);
 }
-.search-container {
+.myui-search-container {
   margin-bottom: 4px;
 }
 </style>

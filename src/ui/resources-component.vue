@@ -1,13 +1,13 @@
 <template>
-  <div class="resources-container">
-    <div class="resource-components-container">
+  <div class="myui-resources-container">
+    <div class="myui-resource-components-container">
       <ResourceComponent
         v-for="resource of resources"
         :resource="resource"
         :key="key(resource)"
       ></ResourceComponent>
     </div>
-    <div class="resources-selector-buttons">
+    <div class="myui-resources-selector-buttons">
       <RoundButton @click="selectAll">{{selectButtonText}}</RoundButton>
       <RoundButton @click="resourceService.save()">Save</RoundButton>
     </div>
@@ -59,17 +59,17 @@ export default class ContentComponent extends Vue {
 </script>
 
 <style scoped>
-.resources-container {
+.myui-resources-container {
   height: calc(100% - 38px);
 }
-.resources-selector-buttons {
+.myui-resources-selector-buttons {
   width: 100%;
   margin: 6px 0 4px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
 }
-.resource-components-container {
+.myui-resource-components-container {
   max-width: 732px;
   max-height: calc(100% - 40px);
   margin: 4px;

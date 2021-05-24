@@ -1,10 +1,10 @@
 <template>
   <div>
-    <div class="overlay" v-show="isOpen" @click="close()"></div>
-    <div class="panel root-container" ref="container" v-show="isOpen">
+    <div class="myui-overlay" v-show="isOpen" @click="close()"></div>
+    <div class="myui-panel myui-root-container" ref="container" v-show="isOpen">
       <ContainerComponent @close="close()"></ContainerComponent>
     </div>
-    <div class="panel hover" ref="hover" v-draggable="draggableOptions">
+    <div class="myui-panel myui-hover" ref="hover" v-draggable="draggableOptions">
       <CounterComponent @open="isOpen?close():open()"></CounterComponent>
     </div>
   </div>
@@ -88,14 +88,14 @@ export default class RootComponent extends Vue {
 </script>
 
 <style scoped>
-.overlay {
+.myui-overlay {
   position: fixed;
   z-index: 2147483647;
   top: 0; bottom: 0;
   left: 0; right: 0;
   background-color: #0000004d;
 }
-.panel {
+.myui-panel {
   position: fixed;
   overflow: hidden;
   z-index: 2147483647;
@@ -107,11 +107,11 @@ export default class RootComponent extends Vue {
   background: white;
   box-shadow: 1px 1px 4px 0 #00000066;
 }
-.root-container {
+.myui-root-container {
   top: 12px;
   height: calc(100vh - 24px);
 }
-.hover {
+.myui-hover {
   cursor: move;
 }
 </style>

@@ -1,9 +1,9 @@
 <template>
-  <div class="resource-container"
-       :class="{'resource-selected': resource.selected}"
+  <div class="myui-resource-container"
+       :class="{'myui-resource-selected': resource.selected}"
        @click="click"
   >
-    <div class="resource-entity">
+    <div class="myui-resource-entity">
       <img v-if="resource.type==='image'"
            :src="proxyUrl" alt=""
            @load="onloadImage($event)"
@@ -19,10 +19,10 @@
       />
       <div v-else-if="resource.type==='audio'">Audio</div>
     </div>
-    <div class="resource-title" v-if="title">{{title}}</div>
-    <div class="resource-description" v-if="resource.description">{{resource.description}}</div>
-    <div class="resource-selector">
-      <div class="resource-selector-dot" v-if="resource.selected"></div>
+    <div class="myui-resource-title" v-if="title">{{title}}</div>
+    <div class="myui-resource-description" v-if="resource.description">{{resource.description}}</div>
+    <div class="myui-resource-selector">
+      <div class="myui-resource-selector-dot" v-if="resource.selected"></div>
     </div>
   </div>
 </template>
@@ -74,7 +74,7 @@ export default class CounterComponent extends Vue {
 </script>
 
 <style scoped>
-.resource-container {
+.myui-resource-container {
   width: 120px;
   height: 120px;
   position: relative;
@@ -84,19 +84,19 @@ export default class CounterComponent extends Vue {
   cursor: pointer;
   background-color: #F5F5F5;
 }
-.resource-selected {
+.myui-resource-selected {
   width: 116px;
   height: 116px;
   border-style: solid;
   border-width: 2px;
 }
 
-.resource-entity {
+.myui-resource-entity {
   position: relative;
   width: 100%;
   height: 100%;
 }
-.resource-entity > * {
+.myui-resource-entity > * {
   position: absolute;
   top: 0;
   left: 0;
@@ -105,7 +105,7 @@ export default class CounterComponent extends Vue {
   object-fit: cover;
 }
 
-.resource-title {
+.myui-resource-title {
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -121,7 +121,7 @@ export default class CounterComponent extends Vue {
   padding: 0 4px;
 }
 
-.resource-description {
+.myui-resource-description {
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
@@ -138,7 +138,7 @@ export default class CounterComponent extends Vue {
   max-height: 48px;
 }
 
-.resource-selector {
+.myui-resource-selector {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -152,7 +152,7 @@ export default class CounterComponent extends Vue {
   border-style: solid;
   border-width: 1px;
 }
-.resource-selector-dot {
+.myui-resource-selector-dot {
   width: 13px;
   height: 13px;
   border-radius: 50%;

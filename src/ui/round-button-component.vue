@@ -1,5 +1,5 @@
 <template>
-  <button class="round-button" type="button" @click="$emit('click')">
+  <button class="myui-round-button" type="button" @click="$emit('click')">
     <slot></slot>
   </button>
 </template>
@@ -15,7 +15,7 @@ export default class ContainerComponent extends Vue {
 </script>
 
 <style scoped>
-.round-button {
+.myui-round-button {
   flex: 0 0 auto;
 
   display: inline-flex;
@@ -33,7 +33,7 @@ export default class ContainerComponent extends Vue {
   color: white;
   cursor: pointer;
 }
-.round-button:hover {
+.myui-round-button:hover {
   background-color: #9E9E9E;
 }
 </style>

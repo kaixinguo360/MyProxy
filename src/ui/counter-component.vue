@@ -1,5 +1,5 @@
 <template>
-  <div class="counter">
+  <div class="myui-counter">
     <RoundButton @click="$emit('open')">{{resourceService.size}}</RoundButton>
   </div>
 </template>
@@ -18,7 +18,7 @@ export default class CounterComponent extends Vue {
 </script>
 
 <style scoped>
-.counter {
+.myui-counter {
   display: inline-flex;
   align-items: center;
   justify-content: center;
